@@ -248,6 +248,3 @@ Jika *frontend* di-deploy ke Vercel (URL berakhiran `.vercel.app`), sistem akan 
 | `/api/crawler/run` | POST | Trigger manual crawl |
 | `/api/crawler/start` | POST | Aktifkan auto-crawl scheduler |
 | `/api/crawler/stop` | POST | Hentikan auto-crawl scheduler |
-
-#   Y o u T u b e S e n t i m e n t A I  
- 

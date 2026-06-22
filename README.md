@@ -1,10 +1,15 @@
-# YouTube Comment Monitoring - Sentimen Untold Story
-
-Sistem monitoring dan crawling komentar YouTube menggunakan **YouTube Data API v3 resmi dari Google**. Modul ini dirancang agar dapat berjalan secara incremental (hemat kuota), mendeteksi perubahan/edit komentar (anti-duplikat), mendeteksi comments-disabled secara aman, serta memisahkan data baseline dengan komentar baru setelah monitoring berjalan.
-
-Sistem ini menyimpan data terstruktur ke dalam database **SQLite** (bukan CSV sebagai penyimpanan utama), dan menyediakan script CLI untuk kemudahan operasional dan integrasi.
+<div align="center">
+  <h1>🚀 YouTube Sentiment AI</h1>
+  <p><b>An Enterprise-Grade YouTube Comment Intelligence & Sentiment Analysis Platform</b></p>
+  
+  [![Demo Available](https://img.shields.io/badge/Live_Demo-Vercel-black?logo=vercel&style=for-the-badge)](#-live-demo-auto-demo-mode)
+  [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg?style=for-the-badge&logo=python)](https://www.python.org/downloads/)
+  [![Local LLM](https://img.shields.io/badge/AI-Ollama-orange.svg?style=for-the-badge)](#)
+</div>
 
 ---
+
+Sistem monitoring dan analisis komentar YouTube menggunakan **YouTube Data API v3 resmi dari Google** dipadukan dengan kekuatan **Local LLM (Ollama)**. Modul ini dirancang agar dapat berjalan secara *incremental* (hemat kuota), mendeteksi perubahan/edit komentar (anti-duplikat), mendeteksi *comments-disabled* secara aman, serta memisahkan data *baseline* dengan komentar baru secara otomatis. Sistem ini menyimpan data terstruktur ke dalam database **SQLite**, dan menyediakan antarmuka Dashboard interaktif.
 
 ## Fitur Utama
 
@@ -220,6 +225,13 @@ Buka browser di **http://localhost:5000** untuk mengakses dashboard.
 - **Toast Notifications** — Notifikasi real-time untuk setiap aksi
 - **Responsive Design** — Mobile-friendly dengan sidebar collapsible
 - **Auto Refresh** — Dashboard otomatis memperbarui data setiap 60 detik
+
+## 🌟 Live Demo (Auto Demo Mode)
+
+Proyek ini mendukung **Auto Demo Mode** melalui Vercel untuk kemudahan demonstrasi kepada *Recruiter/HR*. 
+Jika *frontend* di-deploy ke Vercel (URL berakhiran `.vercel.app`), sistem akan **otomatis mem-bypass otentikasi login** dan memuat **Data Simulasi (Dummy Data)** interaktif ke dalam dashboard. Hal ini memungkinkan siapapun untuk merasakan langsung *User Experience (UX)* dari sistem ini tanpa perlu melakukan setup *backend* AI / LLM secara lokal.
+
+*(Masukkan link Vercel Anda di sini nantinya)*
 
 #### API Endpoints
 | Endpoint | Method | Deskripsi |

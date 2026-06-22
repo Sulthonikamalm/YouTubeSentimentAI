@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantausentimen - Dashboard Monitoring</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/data-viz.css">
+  <link rel="stylesheet" href="assets/css/crawler.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+
+  <!-- Sidebar dan overlay di-inject secara dinamis melalui assets/js/layout.js -->
+
+  <!-- ===================================================================
+       MAIN CONTENT
+       =================================================================== -->
+  <main class="main-content">
+
+    <!-- 1. Header dan Action -->
+    <header class="topbar">
+      <div class="topbar-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Buka menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="topbar-title-group">
+            <h1 class="topbar-title">Dashboard</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="run-buttons-group" style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" id="btnRunSystem" title="Jalankan Crawl & Analisis sekaligus">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Jalankan Sistem
+            </button>
+            <button class="btn btn-secondary" id="btnRunCrawlOnly" title="Hanya menarik komentar baru">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Crawl Saja
+            </button>
+            <button class="btn btn-secondary" id="btnRunInferenceOnly" title="Hanya menganalisis sentimen dari antrean">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Analisis Saja
+            </button>
+            <button class="btn btn-danger" id="btnStopInference" title="Hentikan proses analisis AI yang sedang berjalan" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16"/></svg>
+              Hentikan Analisis
+            </button>
+          </div>
+          <div class="toggle-wrap" id="toggleAutoMonitor" title="Aktifkan/nonaktifkan auto monitoring">
+            <div class="toggle-track" id="autoMonitorTrack">
+              <div class="toggle-knob"></div>
+            </div>
+            <span class="toggle-label">Auto Monitoring</span>
+          </div>
+          <div class="dropdown" style="position: relative;">
+            <button class="btn btn-ghost" id="btnMoreOptions" title="Pilihan Lainnya">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div id="moreDropdown" class="dropdown-content">
+              <a href="#" id="btnMenuRefresh">Refresh Dashboard</a>
+              <a href="#" id="btnMenuResetData" style="color: var(--color-warning);">Reset Data Analisis</a>
+              <a href="#" id="btnMenuHapusData" style="color: var(--color-danger);">Hapus Semua Data</a>
+              <a href="#" id="btnMenuAddFingerprint">Tambah Sidik Jari</a>
+              <a href="#" id="btnMenuLogout" style="color: var(--color-danger);">Keluar (<span id="currentUserName">…</span>)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Context Strip -->
+      <div class="project-context-strip">
+        <div class="project-context-label">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span>Project:</span>
+        </div>
+        <select id="globalProjectSelect" class="form-select">
+          <option value="">Semua Project</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="btnManageProjects" title="Kelola Project">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          Kelola
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Status Sistem -->
+    <div class="status-strip" id="statusStrip">
+      <div class="status-item" title="Proses mengambil komentar terbaru dari YouTube.">
+        <span class="status-label">Crawler:</span>
+        <span class="status-value" id="statusCrawler">
+          <span class="status-dot gray"></span> Memuat...
+        </span>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-item" title="Proses membaca sentimen, isu, dan kecenderungan respons komentar.">
+        <span class="status-label">Inference:</span>
+        <span class="status-value" id="statusInference">
+          <span class="status-dot gray"></span> Memuat...
+        </span>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-item">
+        <span class="status-label">Model:</span>
+        <span class="status-value" id="statusModel">
+          <span class="status-dot gray"></span> Memuat...
+        </span>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-item" title="Batas penggunaan harian dari YouTube API.">
+        <span class="status-label">Kuota API:</span>
+        <span class="status-value" id="statusQuota">-</span>
+      </div>
+      <div class="status-spacer"></div>
+      <span class="status-updated" id="statusUpdated">Terakhir disinkronkan: -</span>
+    </div>
+
+    <div class="content-body">
+
+      <div id="viewDashboard" class="view-content">
+        <!-- 3. Live Crawling Status -->
+        <div class="section-heading mt-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Status Pekerjaan Sistem
+        </div>
+        
+        <div class="dashboard-grid mb-24">
+          <div class="crawl-progress card" id="crawlProgressPanel">
+            <div class="crawl-progress-header">
+              <div class="crawl-progress-title">
+                Progress Tahapan
+              </div>
+              <span class="crawl-progress-badge idle" id="crawlStatusBadge">Sistem siap menerima perintah.</span>
+            </div>
+            <!-- Stepper for Mode: Both -->
+            <div class="stepper active-stepper" id="stepperBoth">
+              <div class="stepper-step" data-step="idle">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+                <div class="stepper-label">Menunggu Perintah</div>
+              </div>
+              <div class="stepper-step" data-step="connecting">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                <div class="stepper-label">Menyambungkan ke YouTube</div>
+                <div class="stepper-detail" id="bothConnectingDetail">-</div>
+              </div>
+              <div class="stepper-step" data-step="crawling">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+                <div class="stepper-label">Menarik Komentar Baru</div>
+                <div class="stepper-detail" id="bothCrawlingDetail">-</div>
+              </div>
+              <div class="stepper-step" data-step="analyzing">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg></div>
+                <div class="stepper-label">Memproses dengan AI (LLM)</div>
+                <div class="stepper-detail" id="bothAnalyzingDetail">-</div>
+              </div>
+              <div class="stepper-step" data-step="done">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="stepper-label">Pekerjaan Selesai</div>
+                <div class="stepper-detail" id="bothDoneDetail">-</div>
+              </div>
+            </div>
+
+            <!-- Stepper for Mode: Crawl Only -->
+            <div class="stepper" id="stepperCrawl" style="display: none;">
+              <div class="stepper-step" data-step="idle">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+                <div class="stepper-label">Menunggu Perintah</div>
+              </div>
+              <div class="stepper-step" data-step="connecting">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                <div class="stepper-label">Menyambungkan ke YouTube</div>
+                <div class="stepper-detail" id="crawlConnectingDetail">-</div>
+              </div>
+              <div class="stepper-step" data-step="crawling">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+                <div class="stepper-label">Menarik Komentar Baru</div>
+                <div class="stepper-detail" id="crawlCrawlingDetail">-</div>
+              </div>
+              <div class="stepper-step" data-step="done">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="stepper-label">Pekerjaan Selesai</div>
+                <div class="stepper-detail" id="crawlDoneDetail">-</div>
+              </div>
+            </div>
+
+            <!-- Stepper for Mode: Inference Only -->
+            <div class="stepper" id="stepperInference" style="display: none;">
+              <div class="stepper-step" data-step="idle">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+                <div class="stepper-label">Menunggu Perintah</div>
+              </div>
+              <div class="stepper-step" data-step="connecting">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l2-9 5 18 2-9h5"/></svg></div>
+                <div class="stepper-label">Mengecek Antrean</div>
+                <div class="stepper-detail" id="inferenceConnectingDetail">-</div>
+              </div>
+              <div class="stepper-step" data-step="analyzing">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg></div>
+                <div class="stepper-label">Memproses dengan AI (LLM)</div>
+                <div class="stepper-detail" id="inferenceAnalyzingDetail">-</div>
+              </div>
+              <div class="stepper-step" data-step="done">
+                <div class="stepper-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="stepper-label">Pekerjaan Selesai</div>
+                <div class="stepper-detail" id="inferenceDoneDetail">-</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card terminal-card">
+            <div class="terminal-header">
+              <div class="terminal-dots"><span></span><span></span><span></span></div>
+              <div class="terminal-title">Riwayat Aktivitas Sistem <span id="liveFeedStatus" class="pulse-indicator gray" style="margin-left:6px;"></span></div>
+            </div>
+            <div class="terminal-body" id="liveFeedBody">
+              <div class="terminal-line text-muted">Sistem saat ini idle. Tekan "Run Crawl Now" untuk memulai.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. KPI Ringkas -->
+        <div class="filter-bar">
+          <label>Video:</label>
+          <select class="form-select" id="filterVideo">
+            <option value="">Semua Video</option>
+          </select>
+          <label>Rentang Waktu:</label>
+          <div class="filter-segmented" id="filterTimeRange">
+            <button class="active" data-days="1">24 Jam</button>
+            <button data-days="7">7 Hari</button>
+            <button data-days="30">30 Hari</button>
+            <button data-days="0">Semua</button>
+          </div>
+          <label>Tipe Data:</label>
+          <div class="filter-segmented" id="filterType">
+            <button class="active" data-type="all" title="Semua komentar">Semua</button>
+            <button data-type="baseline" title="Komentar lama yang sudah ada saat video pertama dipantau.">Baseline</button>
+            <button data-type="new" title="Komentar baru yang muncul setelah sistem berjalan.">Komentar Baru</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid" id="kpiGrid">
+          <!-- Filled by JS -->
+        </div>
+
+        <!-- 5. Insight Keputusan (Dinaikkan prioritasnya) -->
+        <div class="section-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Insight Keputusan / Ringkasan Cepat
+        </div>
+        <div class="insight-panel" id="insightPanel">
+          <!-- Filled by JS -->
+        </div>
+
+        <!-- 6. Grafik Utama -->
+        <div class="section-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analitik Utama
+        </div>
+
+        <div class="dashboard-grid-wide mb-24">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Tren Komentar &amp; Sentimen</div>
+                <div class="card-subtitle">Jumlah komentar per hari berdasarkan sentimen</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" id="timelineChartWrap">
+                <canvas id="timelineChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Distribusi Sentimen</div>
+                <div class="card-subtitle">Persentase sentimen komentar</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" id="sentimentChartWrap" style="min-height:200px;max-width:220px;margin:0 auto;">
+                <canvas id="sentimentChart"></canvas>
+              </div>
+              <div id="sentimentLegend" style="margin-top:10px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid mb-24">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Top Isu yang Dibahas</div>
+                <div class="card-subtitle">Isu paling banyak muncul di komentar</div>
+              </div>
+            </div>
+            <div class="card-body" id="issueChartWrap">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Stance &amp; Action Intent</div>
+                <div class="card-subtitle">Sikap dan kecenderungan komentator</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div style="margin-bottom:16px;">
+                <div class="card-subtitle" style="margin-bottom:6px;font-weight:600;">Stance Publik</div>
+                <div id="stanceChartWrap"></div>
+              </div>
+              <div>
+                <div class="card-subtitle" style="margin-bottom:6px;font-weight:600;">Action Intent</div>
+                <div id="actionIntentChartWrap"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Word Cloud -->
+        <div class="section-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+          Word Cloud Komentar
+        </div>
+        <div class="card mb-24">
+          <div class="card-body" style="position: relative; display: flex; justify-content: center; align-items: center; min-height: 400px; overflow: hidden;" id="wordCloudContainer">
+            <div class="empty-state" id="wordCloudEmpty">
+              <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+              </div>
+              <div class="empty-state-title">Memuat word cloud...</div>
+            </div>
+            <canvas id="wordCloudCanvas" width="800" height="400" style="max-width: 100%; height: auto; display: none;"></canvas>
+            <div id="wordCloudHoverBox" hidden style="pointer-events: none; position: absolute; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); font-size: 13px; color: #0F172A; border: 1px solid #E2E8F0; z-index: 10; transition: opacity 0.2s ease, left 0.1s ease, top 0.1s ease; opacity: 0;"></div>
+          </div>
+        </div>
+
+        <!-- 8. Komentar Representatif -->
+        <div class="section-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Komentar Representatif
+        </div>
+        <div class="card mb-24">
+          <div class="card-header">
+            <div class="card-title">Komentar yang Menjelaskan Kondisi Publik</div>
+            <a href="#" class="link-all" id="linkAllComments">Lihat semua komentar &rarr;</a>
+          </div>
+          <div class="card-body flush">
+            <table class="comment-table" id="commentTable">
+              <thead>
+                <tr>
+                  <th>Komentar</th>
+                  <th>Sentimen</th>
+                  <th>Isu</th>
+                  <th>Interpretasi</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="commentTableBody">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 9. Aktivitas Crawler Detail -->
+        <div class="section-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Riwayat Pemantauan Sistem
+        </div>
+        <div class="card mb-24">
+          <div class="card-body" id="crawlerActivityWrap">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </div><!-- /viewDashboard -->
+
+      <!-- ===================================================================
+           KOMENTAR VIEW (FULL LIST WITH ADVANCED FILTERS)
+           =================================================================== -->
+      <div id="viewComments" class="view-content hidden">
+        <div class="section-heading mt-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Daftar Komentar Publik
+        </div>
+
+        <!-- Advanced Filters Panel -->
+        <div class="card mb-24 filters-card">
+          <div class="card-body">
+            <div class="comments-filters-grid">
+              <div class="filter-group">
+                <label class="form-label" for="commentsSearchInput">Cari Kata Kunci</label>
+                <input type="text" id="commentsSearchInput" class="form-select" placeholder="Cari isi komentar...">
+              </div>
+              <div class="filter-group">
+                <label class="form-label" for="commentsFilterVideo">Video</label>
+                <select id="commentsFilterVideo" class="form-select">
+                  <option value="">Semua Video</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="form-label" for="commentsFilterSentiment">Sentimen</label>
+                <select id="commentsFilterSentiment" class="form-select">
+                  <option value="">Semua Sentimen</option>
+                  <option value="positive">Positif</option>
+                  <option value="neutral">Netral</option>
+                  <option value="negative">Negatif</option>
+                  <option value="pending">Pending (Belum Diproses)</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="form-label" for="commentsFilterIssue">Isu Dominan</label>
+                <select id="commentsFilterIssue" class="form-select">
+                  <option value="">Semua Isu</option>
+                  <option value="ekonomi_rakyat">Ekonomi Rakyat</option>
+                  <option value="kepercayaan_publik">Kepercayaan Publik</option>
+                  <option value="pemerintahan_kebijakan">Pemerintahan & Kebijakan</option>
+                  <option value="hukum_korupsi">Hukum & Korupsi</option>
+                  <option value="elite_politik">Elite Politik</option>
+                  <option value="geopolitik_keamanan">Geopolitik & Keamanan</option>
+                  <option value="media_narasi">Media & Narasi</option>
+                  <option value="demokrasi_aksi_publik">Demokrasi & Aksi Publik</option>
+                  <option value="feedback_video">Feedback Video</option>
+                  <option value="lainnya">Lainnya</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="form-label" for="commentsFilterStance">Stance Publik</label>
+                <select id="commentsFilterStance" class="form-select">
+                  <option value="">Semua Stance</option>
+                  <option value="kritik_pemerintah">Kritik Pemerintah</option>
+                  <option value="dukung_pemerintah">Dukung Pemerintah</option>
+                  <option value="dukung_video">Dukung Video</option>
+                  <option value="kritik_video">Kritik Video</option>
+                  <option value="sinis_tidak_percaya">Sinis / Tidak Percaya</option>
+                  <option value="netral_informatif">Netral / Informatif</option>
+                  <option value="debat_antar_pengguna">Debat Antar Pengguna</option>
+                  <option value="tidak_terdeteksi">Tidak Terdeteksi</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="form-label" for="commentsFilterType">Tipe Data</label>
+                <select id="commentsFilterType" class="form-select">
+                  <option value="">Semua Tipe</option>
+                  <option value="baseline">Baseline</option>
+                  <option value="new">Komentar Baru</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+              <button class="btn btn-secondary" id="btnResetCommentsFilters">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;margin-right:4px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                Reset Filter
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="card mb-24">
+          <div class="card-body flush" style="overflow-x: auto;">
+            <table class="comment-table" id="commentsPageTable">
+              <thead>
+                <tr>
+                  <th>Pengguna &amp; Tanggal</th>
+                  <th>Komentar</th>
+                  <th>Sentimen</th>
+                  <th>Isu &amp; Stance</th>
+                  <th>Interpretasi AI</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="commentsPageTableBody">
+                <!-- Data injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-top: 1px solid var(--color-border-soft); background: var(--color-surface); flex-wrap: wrap; gap: 12px;">
+            <div style="font-size: 13px; color: var(--color-text-secondary);" id="commentsPageInfo">
+              Menampilkan 0-0 dari 0 komentar
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-secondary);">
+                <span>Tampilkan:</span>
+                <select id="commentsPageLimit" class="form-select" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50" selected>50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" id="btnPrevCommentsPage" disabled>Sebelumnya</button>
+                <button class="btn btn-secondary btn-sm" id="btnNextCommentsPage" disabled>Selanjutnya</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /viewComments -->
+
+      <!-- Placeholder Views for other pages in sidebar (for premium feel) -->
+      <div id="viewMonitoring" class="view-content hidden">
+        <div class="section-heading mt-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          Monitoring Real-time
+        </div>
+
+        <!-- Summary cards -->
+        <div class="kpi-grid" id="realtimeSummary">
+          <div class="card" style="padding:18px;">
+            <div class="card-subtitle" style="font-weight:600;">Komentar Masuk Menit Ini</div>
+            <div style="font-size:28px;font-weight:700;color:var(--color-text);margin-top:6px;" id="rtIngestedNow">0</div>
+            <div class="card-subtitle" style="margin-top:2px;">komentar/menit</div>
+          </div>
+          <div class="card" style="padding:18px;">
+            <div class="card-subtitle" style="font-weight:600;">Dianalisis Menit Ini</div>
+            <div style="font-size:28px;font-weight:700;color:var(--color-text);margin-top:6px;" id="rtInferredNow">0</div>
+            <div class="card-subtitle" style="margin-top:2px;">komentar/menit</div>
+          </div>
+          <div class="card" style="padding:18px;">
+            <div class="card-subtitle" style="font-weight:600;">Rata-rata Kecepatan AI</div>
+            <div style="font-size:28px;font-weight:700;color:var(--color-text);margin-top:6px;" id="rtAvgRate">0</div>
+            <div class="card-subtitle" style="margin-top:2px;">komentar/menit (30 mnt)</div>
+          </div>
+          <div class="card" style="padding:18px;">
+            <div class="card-subtitle" style="font-weight:600;">Status</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+              <span class="pulse-indicator gray" id="rtStatusDot"></span>
+              <span style="font-size:14px;font-weight:600;color:var(--color-text);" id="rtStatusText">Tidak Aktif</span>
+            </div>
+            <div class="card-subtitle" style="margin-top:6px;" id="rtUpdatedAt">Belum ada pembaruan</div>
+          </div>
+        </div>
+
+        <div class="card mb-24">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Aliran Komentar Real-time</div>
+              <div class="card-subtitle">Komentar masuk vs selesai dianalisis per menit (30 menit terakhir)</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" id="realtimeMonitorWrap">
+              <canvas id="realtimeMonitorChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="viewVideo" class="view-content hidden">
+        <div class="section-heading mt-8" style="justify-content: space-between; display: flex; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Manajemen Video Pantauan
+          </div>
+          <button class="btn btn-primary" onclick="window.openAddVideoModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Video
+          </button>
+        </div>
+        
+        <div id="videoGridContainer" class="video-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px;">
+          <!-- Skeleton loaders or video cards go here -->
+        </div>
+
+        <div id="videoEmptyState" class="card mb-24 hidden">
+          <div class="empty-state" style="padding: 60px 20px;">
+            <div class="empty-state-icon" style="background: #F3E8FF; color: var(--color-purple);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <div class="empty-state-title">Belum Ada Video Dipantau</div>
+            <div class="empty-state-desc">Tambahkan URL YouTube pertama Anda untuk mulai mengumpulkan komentar dan menganalisis opini audiens.</div>
+            <button class="btn btn-primary mt-16" onclick="window.openAddVideoModal()">Tambah Video Pertama</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="viewCrawler" class="view-content hidden">
+        <div class="section-heading mt-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Konfigurasi Crawler
+        </div>
+        <div class="card mb-24">
+          <div class="card-body" id="crawlerConfigFormWrap" style="display: none;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px 0;">
+              
+              <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; margin-bottom: 8px; display: block;">YouTube API Key</label>
+                <div style="position: relative; display: flex; align-items: center;">
+                  <input type="password" id="inputYoutubeApiKey" class="form-control" placeholder="Masukkan API Key YouTube v3">
+                  <button type="button" class="btn btn-ghost" id="btnToggleApiKey" style="position: absolute; right: 8px; padding: 4px;" title="Tampilkan/Sembunyikan">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+                <div class="help-text mt-8">API Key dibutuhkan untuk menarik komentar dari YouTube. <a href="https://console.cloud.google.com/" target="_blank" style="color: var(--color-primary); text-decoration: none;">Dapatkan di Google Cloud Console</a>.</div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Interval Auto-Crawl (Menit)</label>
+                <input type="number" id="inputCrawlerInterval" class="form-control" min="1" max="1440" placeholder="Contoh: 10">
+                <div class="help-text mt-8">Seberapa sering sistem secara otomatis mengecek dan menarik komentar baru dari semua video yang dipantau.</div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 32px;">
+                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Maksimal Komentar Per Video</label>
+                <input type="number" id="inputCrawlerMaxComments" class="form-control" min="10" max="10000" placeholder="Contoh: 100">
+                <div class="help-text mt-8">Batas maksimal komentar yang ditarik per video setiap kali crawler berjalan untuk menghemat kuota API.</div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end;">
+                <button class="btn btn-primary" id="btnSaveCrawlerConfig">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                  Simpan Konfigurasi
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="empty-state" id="crawlerConfigLoading" style="padding: 60px 20px;">
+            <div class="spinner"></div>
+            <div style="margin-top: 16px; color: var(--color-text-muted);">Memuat konfigurasi...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAXONOMY AI VIEW -->
+      <div id="viewTaxonomy" class="view-content hidden">
+        <div class="section-heading mt-8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          Konfigurasi Taxonomy AI
+        </div>
+        <div class="card mb-24">
+          <div class="card-body">
+             <div class="empty-state" id="taxonomyEmptyState" style="display: none;">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary);margin-bottom:16px;opacity:0.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Pilih Project Dulu</div>
+                <div style="color: var(--color-text-muted); font-size: 14px; max-width: 400px; margin: 0 auto;">
+                  Silakan pilih project di menu atas untuk mengatur taxonomy (label klasifikasi) AI untuk project tersebut.
+                </div>
+             </div>
+             
+             <div id="taxonomyContent" style="display: none;">
+               <div id="taxonomyGenerateSection" style="margin-bottom: 24px;">
+                 <h4 style="margin-bottom: 12px;">Draft Taxonomy</h4>
+                 <div class="alert alert-info">
+                   Anda belum mengaktifkan taxonomy untuk project ini. Klik <strong>Generate dengan Gemini</strong> untuk membuat draft otomatis berdasarkan 20 sampel komentar.
+                 </div>
+                 <div id="taxonomySampleInfo" style="margin-bottom: 16px; font-size: 13px; color: var(--color-text-muted);">
+                   Memuat jumlah komentar...
+                 </div>
+                 <button class="btn btn-primary" id="btnGenerateTaxonomy" disabled>
+                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                   Generate dengan Gemini
+                 </button>
+               </div>
+               
+               <div id="taxonomyActiveSection" style="display: none;">
+                 <!-- Populated dynamically via JS -->
+               </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /content-body -->
+  </main>
+
+</div><!-- /app-shell -->
+
+<!-- Modal Add Video -->
+<div class="modal-overlay" id="addVideoModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">Tambah Video Pantauan</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label>URL YouTube Video</label>
+        <input type="text" id="inputVideoUrl" class="form-control" placeholder="Contoh: https://youtube.com/watch?v=...">
+        <div class="help-text">Masukkan URL dari video YouTube yang ingin Anda kumpulkan komentarnya.</div>
+      </div>
+      <div class="form-group">
+        <label>Pilih Project</label>
+        <select id="inputVideoProject" class="form-control">
+          <!-- Populated dynamically -->
+        </select>
+        <div class="help-text">Video ini akan menggunakan daftar isu (issues) dan sudut pandang (stance) dari project yang dipilih.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btnCancelAddVideo">Batal</button>
+      <button class="btn btn-primary" id="btnSubmitAddVideo">Tambahkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Manage Projects -->
+<div class="modal-overlay" id="manageProjectsModal">
+  <div class="modal-card" style="max-width: 720px; width: 95%;">
+    <div class="modal-header">
+      <div class="modal-title">Manajemen Project</div>
+      <button class="modal-close-btn" id="btnCloseManageProjects" title="Tutup">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 0;">
+
+      <!-- Intro Banner -->
+      <div style="padding: 16px 20px; background: var(--color-primary-soft); border-bottom: 1px solid var(--color-border-soft);">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="flex-shrink:0; width:36px; height:36px; border-radius:10px; background: var(--color-primary); color:#fff; display:flex; align-items:center; justify-content:center;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:var(--color-text); margin-bottom:4px;">Apa itu Project?</div>
+            <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">
+              Project adalah <strong>ruang lingkup analisis</strong> yang terpisah. Setiap project memiliki aturan klasifikasi AI sendiri, sehingga video tentang "Politik" tidak tercampur dengan video tentang "Review Gadget". Buat satu project per topik/domain.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Existing Projects List -->
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-border-soft);">
+        <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-text-muted); margin-bottom:10px;">
+          Project yang sudah dibuat
+        </div>
+        <div id="projectListContainer" style="border: 1px solid var(--color-border-soft); border-radius: 10px; max-height: 180px; overflow-y: auto; background: var(--color-surface);">
+          <div style="padding:20px; text-align:center; color:var(--color-text-muted); font-size:12px;">Memuat daftar project...</div>
+        </div>
+      </div>
+
+      <!-- Create New Project Form -->
+      <div style="padding: 20px;">
+        <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-text-muted); margin-bottom:16px;">
+          Buat Project Baru
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <div style="width:22px; height:22px; border-radius:50%; background:var(--color-primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;">1</div>
+            <div style="font-size:13px; font-weight:600; color:var(--color-text);">Identitas & Tujuan Project</div>
+          </div>
+          <div style="margin-left: 30px;">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label>Nama Project</label>
+              <input type="text" id="newProjectName" class="form-control" placeholder="Contoh: Analisis Kebijakan Tapera">
+              <div class="help-text">Nama yang mudah dikenali.</div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label>Tujuan Utama (Goal Type)</label>
+              <select id="newProjectGoalType" class="form-control">
+                <option value="" disabled selected>Pilih Tujuan...</option>
+                <option value="Pemetaan Opini Kebijakan">Pemetaan Opini Kebijakan</option>
+                <option value="Analisis Sentimen Brand/Produk">Analisis Sentimen Brand/Produk</option>
+                <option value="Riset Akademis / Sosial">Riset Akademis / Sosial</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label>Penjelasan Tujuan (Goal Text)</label>
+              <textarea id="newProjectGoalText" class="form-control" rows="2" placeholder="Contoh: Saya ingin memetakan apakah netizen lebih banyak mendukung atau menolak iuran Tapera serta alasan utamanya."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Deskripsi <span style="font-weight:400; color:var(--color-text-muted);">(opsional)</span></label>
+              <input type="text" id="newProjectDesc" class="form-control" placeholder="Catatan internal tambahan">
+            </div>
+          </div>
+        </div>
+        
+        <div class="alert alert-info" style="margin-bottom: 16px;">
+            Project akan disimpan sebagai <strong>Draft</strong>. Anda dapat menambahkan video dan biarkan Gemini membuatkan Taxonomy (Label AI) secara otomatis nanti.
+        </div>
+
+        <button class="btn btn-primary" id="btnSubmitAddProject" style="width: 100%; padding: 10px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Simpan sebagai Draft
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/stepper.js"></script>
+<script src="assets/js/render.js"></script>
+<script src="assets/js/modules/tab-dashboard.js"></script>
+<script src="assets/js/modules/tab-projects.js"></script>
+<script src="assets/js/modules/tab-videos.js"></script>
+<script src="assets/js/modules/tab-comments.js"></script>
+<script src="assets/js/modules/crawler-feed.js"></script>
+<script src="assets/js/modules/tab-crawler.js"></script>
+<script src="assets/js/modules/tab-taxonomy.js"></script>
+<script src="assets/js/modules/main.js"></script>
+<script src="assets/js/account.js"></script>
+</body>
+</html>

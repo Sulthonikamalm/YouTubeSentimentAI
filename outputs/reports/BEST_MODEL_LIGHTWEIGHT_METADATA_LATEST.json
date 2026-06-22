@@ -1,0 +1,11 @@
+{
+  "run_id": "20260616_095359",
+  "best_model_name": "09_PROPOSED_text_metadata_logreg",
+  "best_model_latest_path": "/content/drive/MyDrive/sentimenuntoldstory/outputs/models/BEST_MODEL_LATEST.joblib",
+  "best_model_versioned_path": "/content/drive/MyDrive/sentimenuntoldstory/outputs/models/BEST_MODEL_09_PROPOSED_text_metadata_logreg_20260616_095359.joblib",
+  "label_source": "bert_pseudo_label",
+  "selection_metric": "production_score",
+  "benchmark_path": "/content/drive/MyDrive/sentimenuntoldstory/outputs/tables/sentiment_benchmark_v7_20260616_095359.csv",
+  "classification_report_path": "/content/drive/MyDrive/sentimenuntoldstory/outputs/tables/best_model_report_v7_20260616_095359.csv",
+  "note": "If label_source is bert_pseudo_label, this is prototype, not final scientific validation."
+}

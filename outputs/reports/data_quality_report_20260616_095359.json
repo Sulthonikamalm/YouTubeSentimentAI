@@ -1,0 +1,46 @@
+{
+  "run_id": "20260616_095359",
+  "data_path": "/content/drive/MyDrive/sentimenuntoldstory/raw/combined_all_comments.csv",
+  "rows": 10728,
+  "part_counts": {
+    "Part 2": 7791,
+    "Part 1": 2937
+  },
+  "comment_level_counts": {
+    "top_level": 7861,
+    "reply": 2867
+  },
+  "duplicate_comment_id": 357,
+  "empty_comment_text": 1,
+  "missing_values": {
+    "video_part": 0,
+    "video_url": 0,
+    "video_id": 0,
+    "video_title": 0,
+    "channel_title": 0,
+    "comment_id": 0,
+    "parent_id": 7861,
+    "author_display_name": 0,
+    "comment_text": 0,
+    "like_count": 0,
+    "reply_count": 0,
+    "published_at": 0,
+    "updated_at": 0,
+    "is_reply": 0,
+    "comment_level": 0,
+    "collected_at": 0,
+    "published_date": 0,
+    "text_length": 0,
+    "word_count": 0
+  },
+  "text_length_summary": {
+    "count": 10728.0,
+    "mean": 158.61390753169277,
+    "std": 271.79542994377897,
+    "min": 0.0,
+    "25%": 42.0,
+    "50%": 88.0,
+    "75%": 178.0,
+    "max": 6256.0
+  }
+}

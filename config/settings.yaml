@@ -1,0 +1,27 @@
+app:
+  name: "YouTube Comment Monitoring"
+  environment: "development"
+
+youtube:
+  order: "time"
+  text_format: "plainText"
+  max_comments_per_video_per_run: 100
+  fetch_replies: true
+  max_replies_per_comment: 100
+  request_timeout_seconds: 20
+
+crawler:
+  consecutive_dup_threshold: 30
+
+scheduler:
+  enabled: false
+  interval_minutes: 10
+  prevent_overlap: true
+
+storage:
+  database_url: "sqlite:///data/youtube_monitor.db"
+
+quota:
+  daily_limit: 10000
+  warning_threshold: 8000
+  track_usage: true

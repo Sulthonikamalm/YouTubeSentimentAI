@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pantausentimen membantu tim membaca sentimen, isu dominan, dan konteks keputusan dari komentar YouTube yang terkumpul.">
+  <meta name="theme-color" content="#F8FAFC">
+  <title>Pantausentimen — Monitoring Komentar YouTube</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/landing.css">
+  <link rel="stylesheet" href="assets/css/landing.responsive.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
+
+  <header class="navbar" id="navbar">
+    <div class="container navbar__inner">
+      <a class="brand" href="#beranda" aria-label="Pantausentimen, kembali ke beranda">
+        <img src="assets/img/logo.png" alt="" width="34" height="34">
+        <span>Pantausentimen</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navigasi utama">
+        <a href="#masalah">Manfaat</a>
+        <a href="#cara-kerja">Cara kerja</a>
+        <a href="#preview">Dashboard</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <button class="menu-button" id="mobileMenuButton" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Buka menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <nav class="mobile-menu" id="mobileMenu" aria-label="Navigasi mobile" hidden>
+      <a href="#masalah">Manfaat</a>
+      <a href="#cara-kerja">Cara kerja</a>
+      <a href="#preview">Dashboard</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <!-- 1. Hero -->
+    <section class="hero" id="beranda" aria-labelledby="hero-title">
+      <div class="hero__sticky">
+        <canvas class="hero__canvas" id="heroFrameCanvas" aria-hidden="true"></canvas>
+        <img class="hero__fallback" src="assets/img/hero-light.jpg" alt="">
+        <div class="hero__scrim" aria-hidden="true"></div>
+        <div class="hero__bottom-mask" aria-hidden="true"></div>
+
+        <div class="container hero__inner">
+          <div class="hero__content">
+            <p class="hero__kicker reveal" style="margin-bottom: 16px;"><span style="background-color: rgba(37, 99, 235, 0.75); color: #FFFFFF; padding: 6px 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.85rem; display: inline-block;">Platform Intelijen Komentar Publik</span></p>
+            <h1 id="hero-title" class="reveal" style="transition-delay: .06s">Ubah ribuan komentar<br>menjadi keputusan.</h1>
+            <p class="hero__lead reveal" style="transition-delay: .14s">Pantau sentimen dan isu publik dari komentar YouTube secara otomatis — ubah keramaian menjadi konteks yang siap ditindak.</p>
+            <div class="hero__actions reveal" style="transition-delay: .22s">
+              <a class="button button--primary button--large" href="/dashboard">Buka Dashboard</a>
+              <a class="button button--outline button--large" href="#cara-kerja">Lihat cara kerja</a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Masalah & Solusi -->
+    <section class="section comparison" id="masalah" aria-labelledby="comparison-title">
+      <div class="container">
+        <div class="comparison__heading reveal">
+          <p class="eyebrow">Masalah & solusi</p>
+          <h2 id="comparison-title">Dari komentar yang ramai menjadi <span>insight yang jelas.</span></h2>
+          <p>Perbedaannya bukan sekadar lebih cepat. Tim mendapat struktur untuk melihat apa yang berubah dan apa yang perlu diperiksa lebih dahulu.</p>
+        </div>
+
+        <div class="comparison-tabs reveal" role="tablist" aria-label="Pilih cara membaca komentar">
+          <button id="comparison-tab-manual" type="button" role="tab" aria-selected="false" aria-controls="comparison-card-manual" tabindex="-1" data-comparison-target="manual">
+            <span>01</span>Tanpa Pantausentimen
+          </button>
+          <button id="comparison-tab-product" class="is-active" type="button" role="tab" aria-selected="true" aria-controls="comparison-card-product" data-comparison-target="product">
+            <span>02</span>Dengan Pantausentimen
+          </button>
+        </div>
+
+        <div class="comparison-stage reveal" data-comparison-active="product">
+          <article class="comparison-showcase-card comparison-showcase-card--manual" id="comparison-card-manual" role="tabpanel" aria-labelledby="comparison-tab-manual" aria-hidden="true" data-comparison-card="manual">
+            <div class="comparison-showcase-card__surface">
+              <header class="comparison-showcase-card__top">
+                <span class="comparison-showcase-card__number">01</span>
+                <div>
+                  <span class="comparison-showcase-card__eyebrow">Tanpa Pantausentimen</span>
+                  <strong>Proses manual</strong>
+                </div>
+                <p><strong>363</strong><span>komentar dibaca satu per satu</span></p>
+              </header>
+              <h3>Tim melihat keramaian, tetapi sulit menemukan prioritas.</h3>
+              <p class="comparison-showcase-card__description">Komentar datang dalam konteks yang berbeda, sementara isu dapat bergeser sebelum proses rekap selesai.</p>
+              <ol class="comparison-showcase-card__list">
+                <li><span>01</span><p>Komentar terlalu banyak untuk dibaca satu per satu.</p></li>
+                <li><span>02</span><p>Perubahan isu mudah terlambat terlihat.</p></li>
+                <li><span>03</span><p>Komentar penting bercampur dengan percakapan berulang.</p></li>
+              </ol>
+            </div>
+            <footer class="comparison-showcase-card__result">
+              <span>Hasil</span>
+              <p>Keputusan dimulai dari rekap, bukan dari konteks.</p>
+            </footer>
+          </article>
+
+          <article class="comparison-showcase-card comparison-showcase-card--manual comparison-showcase-card--mirror" aria-hidden="true" data-comparison-preview="manual">
+            <div class="comparison-showcase-card__surface">
+              <header class="comparison-showcase-card__top">
+                <span class="comparison-showcase-card__number">01</span>
+                <div>
+                  <span class="comparison-showcase-card__eyebrow">Tanpa Pantausentimen</span>
+                  <strong>Proses manual</strong>
+                </div>
+                <p><strong>363</strong><span>komentar dibaca satu per satu</span></p>
+              </header>
+              <h3>Tim melihat keramaian, tetapi sulit menemukan prioritas.</h3>
+              <p class="comparison-showcase-card__description">Komentar datang dalam konteks yang berbeda, sementara isu dapat bergeser sebelum proses rekap selesai.</p>
+              <ol class="comparison-showcase-card__list">
+                <li><span>01</span><p>Komentar terlalu banyak untuk dibaca satu per satu.</p></li>
+                <li><span>02</span><p>Perubahan isu mudah terlambat terlihat.</p></li>
+                <li><span>03</span><p>Komentar penting bercampur dengan percakapan berulang.</p></li>
+              </ol>
+            </div>
+            <footer class="comparison-showcase-card__result">
+              <span>Hasil</span>
+              <p>Keputusan dimulai dari rekap, bukan dari konteks.</p>
+            </footer>
+          </article>
+
+          <article class="comparison-showcase-card comparison-showcase-card--product is-active" id="comparison-card-product" role="tabpanel" aria-labelledby="comparison-tab-product" aria-hidden="false" data-comparison-card="product">
+            <div class="comparison-showcase-card__surface">
+              <header class="comparison-showcase-card__top">
+                <span class="comparison-showcase-card__number">02</span>
+                <div>
+                  <span class="comparison-showcase-card__eyebrow">Dengan Pantausentimen</span>
+                  <strong>Alur terstruktur</strong>
+                </div>
+                <p><strong>363</strong><span>komentar diringkas dalam satu alur</span></p>
+              </header>
+              <h3>Tim dapat memulai dari pola yang perlu ditinjau.</h3>
+              <p class="comparison-showcase-card__description">Pantausentimen menyusun komentar, sentimen, isu, dan contoh representatif tanpa menghilangkan batas interpretasinya.</p>
+              <ol class="comparison-showcase-card__list">
+                <li><span>01</span><p>Komentar dan reply terbaru dipantau otomatis.</p></li>
+                <li><span>02</span><p>Sentimen dan isu diringkas berdasarkan data terkumpul.</p></li>
+                <li><span>03</span><p>Komentar representatif dan tindakan yang disarankan ditampilkan.</p></li>
+              </ol>
+            </div>
+            <footer class="comparison-showcase-card__result">
+              <span>Hasil</span>
+              <p>Diskusi dimulai dari konteks yang dapat diperiksa.</p>
+            </footer>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Demo Interaktif Cara Kerja -->
+    <section class="section workflow" id="cara-kerja" aria-labelledby="workflow-title">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Cara kerja</p>
+            <h2 id="workflow-title">Lihat bagaimana sistem membaca komentar.</h2>
+          </div>
+          <p>Pilih langkah untuk melihat proses dari video sumber sampai insight yang siap ditinjau tim.</p>
+        </div>
+
+        <div class="workflow__shell reveal" data-parallax="0.03">
+          <div class="workflow__steps" role="tablist" aria-label="Tahapan pemantauan komentar">
+            <div class="workflow__progress" aria-hidden="true"><span id="workflowProgress"></span></div>
+            <button class="workflow-step is-active" type="button" role="tab" aria-selected="true" data-step="0">
+              <span class="workflow-step__number">01</span><span><strong>Pilih video</strong><small>Tentukan sumber pemantauan</small></span>
+            </button>
+            <button class="workflow-step" type="button" role="tab" aria-selected="false" data-step="1">
+              <span class="workflow-step__number">02</span><span><strong>Ambil komentar</strong><small>Komentar dan reply terbaru</small></span>
+            </button>
+            <button class="workflow-step" type="button" role="tab" aria-selected="false" data-step="2">
+              <span class="workflow-step__number">03</span><span><strong>Saring duplikat</strong><small>Simpan data yang belum ada</small></span>
+            </button>
+            <button class="workflow-step" type="button" role="tab" aria-selected="false" data-step="3">
+              <span class="workflow-step__number">04</span><span><strong>Analisis komentar</strong><small>Baca sentimen dan isu</small></span>
+            </button>
+            <button class="workflow-step" type="button" role="tab" aria-selected="false" data-step="4">
+              <span class="workflow-step__number">05</span><span><strong>Tampilkan insight</strong><small>Susun konteks untuk tim</small></span>
+            </button>
+          </div>
+
+          <div class="workflow-preview" role="tabpanel" tabindex="0">
+            <div class="product-bar"><span>Pantausentimen</span><small id="workflowStatus">Sumber pemantauan</small></div>
+            <div class="workflow-preview__body" id="workflowPreviewBody">
+              <div class="preview-label" id="workflowLabel">Langkah 1 dari 5</div>
+              <h3 id="workflowPreviewTitle">Pilih video yang ingin dipantau</h3>
+              <p id="workflowPreviewDescription">Masukkan URL video YouTube publik dan kelompokkan ke proyek pemantauan yang sesuai.</p>
+              <div class="preview-ui" id="workflowMock" data-variant="video">
+                <span class="preview-ui__label">URL video YouTube</span>
+                <div class="preview-ui__field">youtube.com/watch?v=isu-publik</div>
+                <div class="preview-ui__meta"><span>Proyek: Respons kebijakan</span><strong>Siap dipantau</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Dashboard Preview -->
+    <section class="section dashboard-preview" id="preview" aria-labelledby="dashboard-title">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Dashboard preview</p>
+            <h2 id="dashboard-title">Satu dashboard untuk membaca kondisi percakapan.</h2>
+          </div>
+          <p id="dashboardTabDescription" aria-live="polite">Lihat keseimbangan sentimen dan perubahan respons pada komentar yang telah dianalisis.</p>
+        </div>
+
+        <div class="dashboard-tabs reveal" role="tablist" aria-label="Fokus dashboard">
+          <button class="is-active" type="button" role="tab" aria-selected="true" data-dashboard-tab="sentiment">Sentimen</button>
+          <button type="button" role="tab" aria-selected="false" data-dashboard-tab="issues">Isu</button>
+          <button type="button" role="tab" aria-selected="false" data-dashboard-tab="recommendation">Rekomendasi</button>
+        </div>
+
+        <div class="dashboard-shell reveal" data-active-dashboard="sentiment">
+          <div class="dashboard-shell__topbar">
+            <div><strong>Pantausentimen</strong><span>Ringkasan pemantauan</span></div>
+            <p><i></i>Sistem aktif · diperbarui 2 menit lalu</p>
+          </div>
+
+          <div class="dashboard-stats">
+            <div><span>Video dipantau</span><strong><span class="counter" data-counter="2">2</span></strong></div>
+            <div><span>Komentar terkumpul</span><strong><span class="counter" data-counter="363">363</span></strong></div>
+            <div><span>Komentar baru</span><strong>+<span class="counter" data-counter="89">89</span></strong></div>
+            <div><span>Telah dianalisis</span><strong><span class="counter" data-counter="100">100</span>%</strong></div>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="dashboard-module module-sentiment is-highlighted" data-dashboard-module="sentiment">
+              <div class="module-heading"><h3>Distribusi sentimen</h3><span>363 komentar</span></div>
+              <div class="sentiment-summary"><strong>46%</strong><span>Negatif terindikasi dominan</span></div>
+              <div class="bar-row"><span>Negatif</span><div><i style="width:46%"></i></div><strong>46%</strong></div>
+              <div class="bar-row bar-row--neutral"><span>Netral</span><div><i style="width:32%"></i></div><strong>32%</strong></div>
+              <div class="bar-row bar-row--positive"><span>Positif</span><div><i style="width:22%"></i></div><strong>22%</strong></div>
+            </article>
+
+            <article class="dashboard-module module-issues" data-dashboard-module="issues">
+              <div class="module-heading"><h3>Isu dominan</h3><span>7 isu terdeteksi</span></div>
+              <strong class="issue-title">Ekonomi rakyat</strong>
+              <p>Keluhan mengenai harga kebutuhan dan daya beli paling sering muncul pada komentar terbaru.</p>
+              <div class="word-cloud" aria-label="Kata yang sering muncul">
+                <b>harga</b><span>rakyat</span><strong>ekonomi</strong><small>kebutuhan</small><span>kerja</span>
+              </div>
+            </article>
+
+            <article class="dashboard-module module-comment">
+              <div class="module-heading"><h3>Komentar representatif</h3><span>Negatif · ekonomi</span></div>
+              <blockquote>“Yang paling terasa sekarang harga kebutuhan naik, sementara pendapatan tidak ikut berubah.”</blockquote>
+              <p>Komentar dipilih karena paling dekat dengan pola isu yang dominan pada data terkumpul.</p>
+            </article>
+
+            <article class="dashboard-module module-recommendation" data-dashboard-module="recommendation">
+              <div class="module-heading"><h3>Insight keputusan</h3><span>Perlu ditinjau</span></div>
+              <p class="recommendation-lead">Kekhawatiran ekonomi cenderung meningkat pada komentar baru.</p>
+              <p>Tim dapat menyiapkan penjelasan yang lebih konkret mengenai dampak kebijakan terhadap kebutuhan sehari-hari.</p>
+              <button type="button" class="text-action" data-open-insight>Periksa dasar insight</button>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Insight -->
+    <section class="section insights" id="insight" aria-labelledby="insight-title">
+      <div class="container insights__layout">
+        <div class="section-intro reveal">
+          <p class="eyebrow">Insight yang dihasilkan</p>
+          <h2 id="insight-title">Bukan hanya angka, tapi konteks untuk bertindak.</h2>
+          <p>Setiap ringkasan tetap dapat ditelusuri ke dasar data dan contoh komentar yang mendukungnya.</p>
+          <div class="disclaimer"><strong>Batas interpretasi</strong>Insight hanya berlaku untuk komentar pada video yang dipantau, bukan representasi seluruh masyarakat.</div>
+        </div>
+
+        <div class="insight-list reveal">
+          <article class="insight-item is-open">
+            <button type="button" aria-expanded="true">
+              <span><small>01</small><strong>Sentimen Dominan</strong></span><i aria-hidden="true"></i>
+            </button>
+            <div class="insight-item__body">
+              <div><span>Ringkasan</span><p>Komentar negatif terindikasi meningkat pada pembahasan ekonomi rakyat.</p></div>
+              <div><span>Dasar data</span><p>Berdasarkan komentar yang terkumpul pada dua video yang dipantau.</p></div>
+              <blockquote>“Harga makin terasa berat, semoga ada penjelasan yang benar-benar menjawab.”</blockquote>
+              <div><span>Tindakan yang disarankan</span><p>Periksa perubahan sentimen per video dan siapkan klarifikasi dengan contoh yang dekat dengan kebutuhan sehari-hari.</p></div>
+            </div>
+          </article>
+
+          <article class="insight-item">
+            <button type="button" aria-expanded="false">
+              <span><small>02</small><strong>Isu Dominan</strong></span><i aria-hidden="true"></i>
+            </button>
+            <div class="insight-item__body" hidden>
+              <div><span>Ringkasan</span><p>Harga kebutuhan dan daya beli menjadi dua konteks yang paling sering berdekatan.</p></div>
+              <div><span>Dasar data</span><p>Terlihat dari pengelompokan isu dan istilah yang berulang pada komentar terbaru.</p></div>
+              <blockquote>“Kalau harga terus naik, yang perlu dijelaskan itu dampaknya ke keluarga biasa.”</blockquote>
+              <div><span>Tindakan yang disarankan</span><p>Susun materi respons yang membahas harga dan daya beli dalam satu konteks, bukan sebagai isu terpisah.</p></div>
+            </div>
+          </article>
+
+          <article class="insight-item">
+            <button type="button" aria-expanded="false">
+              <span><small>03</small><strong>Rekomendasi Tindakan</strong></span><i aria-hidden="true"></i>
+            </button>
+            <div class="insight-item__body" hidden>
+              <div><span>Ringkasan</span><p>Publik cenderung membutuhkan penjelasan yang lebih konkret daripada pesan kebijakan yang umum.</p></div>
+              <div><span>Dasar data</span><p>Disusun dari komentar representatif, action intent, dan isu yang paling sering muncul.</p></div>
+              <blockquote>“Bisa dijelaskan contoh manfaatnya untuk pengeluaran rumah tangga?”</blockquote>
+              <div><span>Tindakan yang disarankan</span><p>Prioritaskan FAQ singkat dan video lanjutan yang menjawab dampak praktis dengan bahasa yang mudah diperiksa.</p></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FAQ + CTA + Footer -->
+    <section class="closing" id="faq" aria-labelledby="faq-title">
+      <div class="container closing__inner">
+        <div class="faq reveal">
+          <div class="section-heading section-heading--compact">
+            <div><p class="eyebrow">FAQ</p><h2 id="faq-title">Hal yang perlu diketahui sebelum membaca insight.</h2></div>
+          </div>
+
+          <div class="faq-list">
+            <article class="faq-item">
+              <button type="button" aria-expanded="false"><span>Apakah Pantausentimen membaca semua komentar?</span><i aria-hidden="true"></i></button>
+              <div hidden><p>Sistem mengambil komentar yang tersedia melalui API resmi YouTube sesuai video, jadwal pemantauan, dan batas kuota yang berlaku.</p></div>
+            </article>
+            <article class="faq-item">
+              <button type="button" aria-expanded="false"><span>Apakah hasilnya mewakili seluruh masyarakat?</span><i aria-hidden="true"></i></button>
+              <div hidden><p>Tidak. Hasil hanya menggambarkan pola pada komentar dari video yang dipantau dan tidak dapat digeneralisasi sebagai suara seluruh masyarakat.</p></div>
+            </article>
+            <article class="faq-item">
+              <button type="button" aria-expanded="false"><span>Apakah sistem berjalan real-time?</span><i aria-hidden="true"></i></button>
+              <div hidden><p>Sistem berjalan near real-time. Komentar diambil dan dianalisis secara berkala sesuai konfigurasi pemantauan.</p></div>
+            </article>
+            <article class="faq-item">
+              <button type="button" aria-expanded="false"><span>Apakah komentar duplikat disimpan?</span><i aria-hidden="true"></i></button>
+              <div hidden><p>Komentar dengan ID yang sudah tersimpan dilewati sehingga data yang sama tidak dicatat dua kali.</p></div>
+            </article>
+            <article class="faq-item">
+              <button type="button" aria-expanded="false"><span>Apakah insight bisa langsung dijadikan keputusan final?</span><i aria-hidden="true"></i></button>
+              <div hidden><p>Tidak. Insight berfungsi mendukung peninjauan data. Konteks tambahan dan pertimbangan manusia tetap diperlukan untuk keputusan final.</p></div>
+            </article>
+          </div>
+        </div>
+
+
+        <div class="final-cta reveal">
+          <p class="eyebrow">Mulai memantau</p>
+          <h2>Siap membaca respons publik dengan lebih cepat?</h2>
+          <p>Pantau komentar yang terkumpul, temukan isu yang perlu diperiksa, lalu bawa konteksnya ke diskusi tim.</p>
+          <div>
+            <a class="button button--primary button--large" href="/dashboard">Masuk ke Dashboard</a>
+            <a class="button button--secondary button--large" href="mailto:tim@pantausentimen.id">Hubungi Tim</a>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div class="brand footer__brand"><img src="assets/img/logo.png" alt="" width="32" height="32"><span>Pantausentimen</span></div>
+          <div class="footer__support"><span>Didukung oleh</span><img src="assets/img/sahabat-ai.png" alt="Sahabat AI" width="104" height="30"></div>
+          <p>© 2025 Pantausentimen</p>
+        </div>
+      </footer>
+    </section>
+  </main>
+
+  <!-- Urutan penting: definisi fungsi global dulu (hero, sections), entry terakhir. -->
+  <script src="assets/js/landing.hero.js"></script>
+  <script src="assets/js/landing.sections.js"></script>
+  <script src="assets/js/landing.js"></script>
+</body>
+</html>

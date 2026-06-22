@@ -1,0 +1,242 @@
+{
+  "issue_taxonomy": {
+    "ekonomi_rakyat": [
+      "ekonomi",
+      "harga",
+      "mahal",
+      "pajak",
+      "beras",
+      "kerja",
+      "pengangguran",
+      "rakyat susah",
+      "miskin",
+      "gaji",
+      "bbm",
+      "sembako",
+      "mbg",
+      "bantuan",
+      "hutang"
+    ],
+    "kepercayaan_publik": [
+      "percaya",
+      "tidak percaya",
+      "kepercayaan",
+      "bohong",
+      "janji",
+      "dikhianati",
+      "kecewa",
+      "muak",
+      "kapok"
+    ],
+    "pemerintahan_kebijakan": [
+      "pemerintah",
+      "kebijakan",
+      "presiden",
+      "menteri",
+      "kabinet",
+      "program",
+      "aturan",
+      "negara",
+      "prabowo",
+      "jokowi",
+      "gibran",
+      "dpr"
+    ],
+    "hukum_korupsi": [
+      "hukum",
+      "korupsi",
+      "koruptor",
+      "kpk",
+      "adil",
+      "keadilan",
+      "suap",
+      "mafia",
+      "nepotisme"
+    ],
+    "elite_politik": [
+      "elite",
+      "pejabat",
+      "partai",
+      "politik",
+      "politisi",
+      "oligarki",
+      "penguasa",
+      "istana",
+      "dinasti"
+    ],
+    "geopolitik_keamanan": [
+      "geopolitik",
+      "perang",
+      "china",
+      "amerika",
+      "israel",
+      "rusia",
+      "militer",
+      "keamanan",
+      "chaos",
+      "kerusuhan",
+      "1998"
+    ],
+    "media_narasi": [
+      "media",
+      "berita",
+      "narasi",
+      "buzzer",
+      "hoax",
+      "propaganda",
+      "konten",
+      "youtube",
+      "channel",
+      "podcast"
+    ],
+    "demokrasi_aksi_publik": [
+      "demo",
+      "demonstrasi",
+      "reformasi",
+      "turun jalan",
+      "mahasiswa",
+      "rakyat bergerak",
+      "aksi",
+      "protes",
+      "revolusi",
+      "pemilu"
+    ],
+    "feedback_video": [
+      "video",
+      "konten",
+      "pembahasan",
+      "analisa",
+      "channel",
+      "terima kasih",
+      "bagus",
+      "mantap",
+      "jelas",
+      "setuju"
+    ]
+  },
+  "stance_taxonomy": {
+    "kritik_pemerintah": [
+      "pemerintah gagal",
+      "pemerintah tidak",
+      "rezim",
+      "penguasa",
+      "oligarki",
+      "rakyat susah",
+      "kecewa",
+      "muak",
+      "tidak percaya",
+      "janji palsu"
+    ],
+    "dukung_pemerintah": [
+      "dukung pemerintah",
+      "percaya pemerintah",
+      "prabowo bisa",
+      "program bagus",
+      "sabar",
+      "kasih waktu",
+      "semoga berhasil"
+    ],
+    "dukung_video": [
+      "setuju",
+      "analisis bagus",
+      "pembahasan bagus",
+      "terima kasih",
+      "mantap",
+      "benar sekali",
+      "masuk akal"
+    ],
+    "kritik_video": [
+      "berlebihan",
+      "menakut nakuti",
+      "tidak setuju",
+      "kurang data",
+      "clickbait",
+      "provokasi"
+    ],
+    "sinis_tidak_percaya": [
+      "sama saja",
+      "percuma",
+      "tidak ada harapan",
+      "susah berubah",
+      "capek",
+      "rakyat dibodohi"
+    ],
+    "netral_informatif": [
+      "menurut data",
+      "informasi",
+      "fakta",
+      "pertanyaannya",
+      "bagaimana"
+    ]
+  },
+  "action_taxonomy": {
+    "menuntut_akuntabilitas": [
+      "usut",
+      "tangkap",
+      "adili",
+      "bertanggung jawab",
+      "audit",
+      "transparan",
+      "buka data",
+      "pecat",
+      "evaluasi",
+      "perbaiki"
+    ],
+    "dorongan_aksi_publik": [
+      "demo",
+      "turun jalan",
+      "bergerak",
+      "aksi",
+      "mahasiswa turun",
+      "rakyat bergerak",
+      "protes",
+      "reformasi",
+      "lawan"
+    ],
+    "perubahan_elektoral": [
+      "pemilu",
+      "pilih",
+      "jangan pilih",
+      "2029",
+      "ganti",
+      "suara rakyat",
+      "pilpres",
+      "partai"
+    ],
+    "menyebarkan_kesadaran": [
+      "share",
+      "sebarkan",
+      "viralkan",
+      "bagikan",
+      "edukasi",
+      "sadar",
+      "bangun",
+      "buka mata"
+    ],
+    "harapan_doa": [
+      "semoga",
+      "mudah mudahan",
+      "doa",
+      "berharap",
+      "amin",
+      "insyaallah"
+    ],
+    "menunggu_mengamati": [
+      "lihat nanti",
+      "tunggu",
+      "kasih waktu",
+      "pantau",
+      "kita lihat"
+    ],
+    "apatis_sinis": [
+      "percuma",
+      "tidak ada harapan",
+      "pasrah",
+      "capek",
+      "sama saja",
+      "biarin"
+    ],
+    "tidak_terdeteksi": []
+  },
+  "note": "Rule-based taxonomy; validate with manual labels."
+}

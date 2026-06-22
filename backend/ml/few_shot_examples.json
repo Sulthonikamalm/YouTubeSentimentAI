@@ -1,0 +1,182 @@
+[
+  {
+    "comment_text": "Wah hebat sekali pak prabowo dan para menteri, harga sembako meroket sampai ga kebelik. Benar-benar mensejahterakan elite!",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.98,
+    "issue_label": "ekonomi_rakyat",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "menuntut_akuntabilitas",
+    "interpretation_short": "Komentar ini menyindir secara sarkas tentang kenaikan harga sembako dan mengkritik kesejahteraan elite politik."
+  },
+  {
+    "comment_text": "Semoga program makanan bergizi gratis sukses dan bisa lancar untuk anak-anak sekolah kita, amin ya rabbal alamin",
+    "sentiment": "positive",
+    "sentiment_confidence": 0.95,
+    "issue_label": "pemerintahan_kebijakan",
+    "stance_label": "dukung_pemerintah",
+    "action_intent_label": "harapan_doa",
+    "interpretation_short": "Komentar ini mendoakan kesuksesan program makanan gratis anak sekolah dari pemerintah."
+  },
+  {
+    "comment_text": "Analisis narasumber di podcast ini sangat berbobot dan membuka mata rakyat tentang kondisi hukum kita saat ini. Mantap mas host!",
+    "sentiment": "positive",
+    "sentiment_confidence": 0.97,
+    "issue_label": "feedback_video",
+    "stance_label": "dukung_video",
+    "action_intent_label": "menyebarkan_kesadaran",
+    "interpretation_short": "Komentar ini mengapresiasi analisis narasumber dalam video yang dianggap membuka wawasan publik tentang hukum."
+  },
+  {
+    "comment_text": "Halah semua pejabat sama aja, pas kampanye janji manis giliran udah duduk lupa sama rakyat. Percuma berharap ada perubahan.",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.95,
+    "issue_label": "kepercayaan_publik",
+    "stance_label": "sinis_tidak_percaya",
+    "action_intent_label": "apatis_sinis",
+    "interpretation_short": "Komentar ini menunjukkan sinisme dan ketidakpercayaan terhadap janji manis pejabat politik."
+  },
+  {
+    "comment_text": "Lu kalo ga tau apa-apa mending diem deh bro, baca dulu aturannya baru komen jangan asal nyalahin presiden",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.85,
+    "issue_label": "pemerintahan_kebijakan",
+    "stance_label": "debat_antar_pengguna",
+    "action_intent_label": "menyebarkan_kesadaran",
+    "interpretation_short": "Komentar ini mendebat pengguna lain yang dianggap tidak memahami kebijakan presiden sebelum berkomentar."
+  },
+  {
+    "comment_text": "Pancen oye tenan pemerintah saiki, rego beras mundak terus, rakyat cilik sing mumet.",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.96,
+    "issue_label": "ekonomi_rakyat",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "apatis_sinis",
+    "interpretation_short": "Komentar berbahasa Jawa ini menyindir pemerintah secara sarkastis mengenai kenaikan harga beras yang membebankan rakyat kecil."
+  },
+  {
+    "comment_text": "Kawal terus kasus ini jgn smp tenggelam!!! #usuttuntas mafia peradilan",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.98,
+    "issue_label": "hukum_korupsi",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "menuntut_akuntabilitas",
+    "interpretation_short": "Komentar ini dengan tegas menuntut akuntabilitas terkait kasus hukum dan menyoroti adanya mafia peradilan."
+  },
+  {
+    "comment_text": "Sehat2 selalu yah pak prabowo maju terus pantang mundur🥹❤️❤️❤️",
+    "sentiment": "positive",
+    "sentiment_confidence": 0.92,
+    "issue_label": "pemerintahan_kebijakan",
+    "stance_label": "dukung_pemerintah",
+    "action_intent_label": "harapan_doa",
+    "interpretation_short": "Komentar ini mendoakan kesehatan dan memberi dukungan moral kepada Presiden Prabowo."
+  },
+  {
+    "comment_text": "Semoga waktunya cukup untuk bersatu kembali, tetap dalam damai kooperatif bersama sampai Agustus 2026 ❤",
+    "sentiment": "positive",
+    "sentiment_confidence": 0.88,
+    "issue_label": "demokrasi_aksi_publik",
+    "stance_label": "dukung_pemerintah",
+    "action_intent_label": "harapan_doa",
+    "interpretation_short": "Komentar ini mendoakan persatuan bangsa dan keharmonisan politik hingga akhir tahun 2026."
+  },
+  {
+    "comment_text": "Soal saham saya sering bersebrangan sama Abang ini tapi soal ini setuju di saat swasembada pangan tercapai itu berapa nilainya subsidi BBM juga bisa ditekan pake b50 seharusnya rupiah bisa menguat",
+    "sentiment": "positive",
+    "sentiment_confidence": 0.80,
+    "issue_label": "ekonomi_rakyat",
+    "stance_label": "netral_informatif",
+    "action_intent_label": "menyebarkan_kesadaran",
+    "interpretation_short": "Komentar ini memberikan analisis ekonomi terkait swasembada pangan, subsidi BBM, dan penguatan rupiah meski berbeda pandangan soal saham dengan host."
+  },
+  {
+    "comment_text": "Bukan dibully, dia itu memang penghianat dari dulu, media asing pun juga mengakui!",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.90,
+    "issue_label": "geopolitik_keamanan",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "menyebarkan_kesadaran",
+    "interpretation_short": "Komentar ini menuduh seseorang sebagai pengkhianat dengan mengutip pengakuan media asing sebagai bukti."
+  },
+  {
+    "comment_text": "Gimana solusinya Bang/Antisipasi yang terbaik dari yang terbaik... Coba dong cari solusinyaaaa... ?.Ok....!.👍👍👍🙏🙏🙏",
+    "sentiment": "positive",
+    "sentiment_confidence": 0.78,
+    "issue_label": "feedback_video",
+    "stance_label": "dukung_video",
+    "action_intent_label": "dorongan_aksi_publik",
+    "interpretation_short": "Komentar ini meminta host video untuk menyajikan solusi dan antisipasi, menunjukkan apresiasi terhadap konten."
+  },
+  {
+    "comment_text": "#sellsingapore",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.70,
+    "issue_label": "geopolitik_keamanan",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "dorongan_aksi_publik",
+    "interpretation_short": "Hashtag ini merupakan seruan geopolitik untuk menjual aset terkait Singapura sebagai bentuk protes ekonomi."
+  },
+  {
+    "comment_text": "Banyak rakyat yg goblok termasuk Jatim Jateng yg termakan narasi manipulator",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.90,
+    "issue_label": "media_narasi",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "menyebarkan_kesadaran",
+    "interpretation_short": "Komentar ini mengkritik masyarakat Jatim dan Jateng yang dianggap mudah termakan narasi manipulasi media."
+  },
+  {
+    "comment_text": "C tyo kemaan nich??? Orang jatim itu",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.75,
+    "issue_label": "elite_politik",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "menuntut_akuntabilitas",
+    "interpretation_short": "Komentar ini mempertanyakan keberadaan seorang tokoh politik asal Jatim, mengindikasikan kekecewaan terhadap ketidakhadirannya."
+  },
+  {
+    "comment_text": "2029 jgn pilih partai yg sama ya guys, kita harus belajar dari kesalahan",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.92,
+    "issue_label": "demokrasi_aksi_publik",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "perubahan_elektoral",
+    "interpretation_short": "Komentar ini mengajak masyarakat untuk tidak memilih partai yang sama di pemilu 2029 sebagai bentuk pembelajaran politik."
+  },
+  {
+    "comment_text": "Makasih bang udah jelasin, baru paham ternyata masalahnya sedalam ini",
+    "sentiment": "positive",
+    "sentiment_confidence": 0.93,
+    "issue_label": "feedback_video",
+    "stance_label": "dukung_video",
+    "action_intent_label": "menyebarkan_kesadaran",
+    "interpretation_short": "Komentar ini mengucapkan terima kasih kepada host karena penjelasan di video membantu memahami isu yang kompleks."
+  },
+  {
+    "comment_text": "Ini bukan soal siapa presidennya, tapi sistem yang udah busuk dari akar. Mau ganti 100x juga sama aja kalo oligarki masih berkuasa.",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.95,
+    "issue_label": "elite_politik",
+    "stance_label": "sinis_tidak_percaya",
+    "action_intent_label": "apatis_sinis",
+    "interpretation_short": "Komentar ini mengkritik sistem oligarki yang dianggap mengakar dan tidak akan berubah meski berganti presiden."
+  },
+  {
+    "comment_text": "Viralkan terus biar semua rakyat tau kebenarannya 🔥🔥🔥",
+    "sentiment": "negative",
+    "sentiment_confidence": 0.88,
+    "issue_label": "media_narasi",
+    "stance_label": "kritik_pemerintah",
+    "action_intent_label": "menyebarkan_kesadaran",
+    "interpretation_short": "Komentar ini mengajak untuk memviralkan informasi agar rakyat mengetahui kebenaran yang dianggap disembunyikan."
+  },
+  {
+    "comment_text": "Kita lihat aja nanti hasilnya, jangan buru-buru menilai",
+    "sentiment": "neutral",
+    "sentiment_confidence": 0.85,
+    "issue_label": "pemerintahan_kebijakan",
+    "stance_label": "netral_informatif",
+    "action_intent_label": "menunggu_mengamati",
+    "interpretation_short": "Komentar ini mengajak untuk menunggu dan mengamati hasil kebijakan sebelum memberikan penilaian."
+  }
+]

@@ -1,0 +1,277 @@
+{
+  "run_id": "20260616_095359",
+  "total_comments": 11406,
+  "video_part_counts": {
+    "Part 2": 8359,
+    "Part 1": 3047
+  },
+  "comment_level_counts": {
+    "top_level": 7865,
+    "reply": 3541
+  },
+  "sentiment_percent": {
+    "negative": 63.76,
+    "positive": 18.84,
+    "neutral": 15.71,
+    "unknown": 1.68
+  },
+  "issue_counts_top": {
+    "lainnya": 3590,
+    "pemerintahan_kebijakan": 3285,
+    "ekonomi_rakyat": 1378,
+    "elite_politik": 1050,
+    "feedback_video": 726,
+    "hukum_korupsi": 329,
+    "kepercayaan_publik": 300,
+    "geopolitik_keamanan": 286,
+    "media_narasi": 278,
+    "demokrasi_aksi_publik": 184
+  },
+  "stance_counts": {
+    "tidak_terdeteksi": 9525,
+    "dukung_video": 534,
+    "kritik_pemerintah": 416,
+    "netral_informatif": 408,
+    "kritik_video": 274,
+    "dukung_pemerintah": 178,
+    "sinis_tidak_percaya": 71
+  },
+  "action_intent_counts": {
+    "tidak_terdeteksi": 8465,
+    "harapan_doa": 764,
+    "dorongan_aksi_publik": 756,
+    "menyebarkan_kesadaran": 657,
+    "menuntut_akuntabilitas": 332,
+    "perubahan_elektoral": 308,
+    "apatis_sinis": 75,
+    "menunggu_mengamati": 49
+  },
+  "topic_summary": [
+    {
+      "topic_id": 0,
+      "top_terms": "yang, tidak, itu, dan, di, ada, dari, jadi, bisa, nya, tapi, juga",
+      "size": 3604
+    },
+    {
+      "topic_id": 4,
+      "top_terms": "ini, video, video ini, saya, nonton, harus, di, negara ini, orang, yang, share, semua",
+      "size": 1254
+    },
+    {
+      "topic_id": 3,
+      "top_terms": "kita, bersatu, negara, mari, harus, mari kita, negara kita, jangan, nkri, ayo, kita bersatu, kita harus",
+      "size": 1200
+    },
+    {
+      "topic_id": 6,
+      "top_terms": "indonesia, rakyat, rakyat indonesia, dan, semoga, untuk, bangsa, tuhan, maju, negara, di indonesia, untuk indonesia",
+      "size": 873
+    },
+    {
+      "topic_id": 9,
+      "top_terms": "singapura, singapore, di, ke, amerika, aja, sell, ke singapura, perang, di singapura, sell singapura, indo",
+      "size": 761
+    },
+    {
+      "topic_id": 5,
+      "top_terms": "prabowo, pak prabowo, pak, sehat, selalu, presiden, sehat selalu, dan, saya, presiden prabowo, prabowo dan, semoga",
+      "size": 649
+    },
+    {
+      "topic_id": 1,
+      "top_terms": "pak gema, pak, gema, terimakasih, keren, terimakasih pak, sehat, keren pak, selalu, thanks, kasih pak, gema dan",
+      "size": 507
+    },
+    {
+      "topic_id": 2,
+      "top_terms": "prof, prof gema, gema, sehat, selalu, sehat selalu, terimakasih prof, terimakasih, selalu prof, sangat, makasih, luar biasa",
+      "size": 446
+    },
+    {
+      "topic_id": 8,
+      "top_terms": "antek, asing, antek asing, antek antek, asing yang, muncul, dan antek, penghianat, soros, hei, bangsa, domba",
+      "size": 335
+    },
+    {
+      "topic_id": 7,
+      "top_terms": "terima, terima kasih, kasih, kasih pak, kasih prof, pencerahannya, atas, kasih pencerahannya, kasih atas, kasih banyak, banyak, atas penjelasannya",
+      "size": 185
+    }
+  ],
+  "top_negative_examples": [
+    {
+      "comment_id": "UgxfapUx0pa4hk7_usl4AaABAg",
+      "video_part": "Part 2",
+      "comment_level": "top_level",
+      "like_count": 1145,
+      "text_excerpt": "yang kayak gini yg harus di siarkan secara luas di TV Nasional, bukan yg menina bobokan. Thumb up utk Pak Gema"
+    },
+    {
+      "comment_id": "Ugwmw9iyP-LAI9GtM8p4AaABAg",
+      "video_part": "Part 2",
+      "comment_level": "top_level",
+      "like_count": 511,
+      "text_excerpt": "INTELIJEN AYO SEMUA TURUN ,. SELAMATKAN NEGARA"
+    },
+    {
+      "comment_id": "UgxgRnIiVbBF7R9isT54AaABAg",
+      "video_part": "Part 2",
+      "comment_level": "top_level",
+      "like_count": 413,
+      "text_excerpt": "\"jangan menghujat, kalau tidak bisa membantu, minimal doakan\""
+    },
+    {
+      "comment_id": "UgwhuPNUifju0ma2ne94AaABAg",
+      "video_part": "Part 1",
+      "comment_level": "top_level",
+      "like_count": 407,
+      "text_excerpt": "Sayangnya, 95% orang indonesia males dengerin video 25 menit. 95% orang sini suka liat video\" potongan, baca berita\" kgk jelas, dll"
+    },
+    {
+      "comment_id": "Ugxvh2bPc8mw2sT4GKt4AaABAg",
+      "video_part": "Part 1",
+      "comment_level": "top_level",
+      "like_count": 367,
+      "text_excerpt": "Jangan biarkan Pak Prabowo sendirian menjaga kedaulatan negara ini guys 😢"
+    },
+    {
+      "comment_id": "Ugw0Ksfohoqq0IbjBaZ4AaABAg",
+      "video_part": "Part 2",
+      "comment_level": "top_level",
+      "like_count": 348,
+      "text_excerpt": "Yang ngaku Cinta Tanah Air Indonesia harus paham ini, jangan cuma menebar kebencian.."
+    },
+    {
+      "comment_id": "UgzKvL1i8DKBrklGrSp4AaABAg",
+      "video_part": "Part 2",
+      "comment_level": "top_level",
+      "like_count": 280,
+      "text_excerpt": "Yang menghancurkan Indonesia adalah warganya sendiri yang korupsi dan mengizinkan pihak asing untuk mengeruk sumber daya alam..\nPak gema sangat cerdas"
+    },
+    {
+      "comment_id": "UgyESH1TZAN0VsxTA214AaABAg",
+      "video_part": "Part 2",
+      "comment_level": "top_level",
+      "like_count": 279,
+      "text_excerpt": "Sayangnya rakyat Indonesia sangat mudah terprovokasi."
+    }
+  ],
+  "top_issue_examples": {
+    "lainnya": [
+      {
+        "comment_id": "UgxfapUx0pa4hk7_usl4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 1145,
+        "text_excerpt": "yang kayak gini yg harus di siarkan secara luas di TV Nasional, bukan yg menina bobokan. Thumb up utk Pak Gema"
+      },
+      {
+        "comment_id": "Ugz2Rdbui_Y_y3AF2el4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 1128,
+        "text_excerpt": "Tolong disiarkan di TV nasional !!!"
+      },
+      {
+        "comment_id": "Ugx0RsxzoKSY3PYhMwJ4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 600,
+        "text_excerpt": "Mari Bersatu untuk Negeri tempat kita hidup dan mengapai masa depan demi anak & cucu kita ...semangat Indonesia Maju ❤"
+      }
+    ],
+    "pemerintahan_kebijakan": [
+      {
+        "comment_id": "Ugw2wLGeBt_I89F9BIZ4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 1186,
+        "text_excerpt": "seluruh elemen  masyarakat, harus nonton ini!  cerdaskan rakyat Indonesia! cerdaskan pemerintahan!"
+      },
+      {
+        "comment_id": "Ugwmw9iyP-LAI9GtM8p4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 511,
+        "text_excerpt": "INTELIJEN AYO SEMUA TURUN ,. SELAMATKAN NEGARA"
+      },
+      {
+        "comment_id": "UgyolNF6GCdc-4a_LVF4AaABAg",
+        "video_part": "Part 1",
+        "comment_level": "top_level",
+        "like_count": 495,
+        "text_excerpt": "PAK GEMA saya tau anda terlalu baik dan tulus mengkritik negeri ini dengan hati nurani. Padahal bapak sudah kaya raya gk ngefek juga kalau negara ini ambruk . Tpi karena bapak peduli dengan nasib negara ini mau gk mau harus ngomong walaupun saya tau ini konten resiko tinggi . Tet"
+      }
+    ],
+    "ekonomi_rakyat": [
+      {
+        "comment_id": "UgwpVey8XZTn6TT3QX54AaABAg",
+        "video_part": "Part 1",
+        "comment_level": "top_level",
+        "like_count": 414,
+        "text_excerpt": "Di tengah situasi ekonomi dan geopolitik yang semakin panas, rakyat Indonesia perlu melihat kondisi ini dengan lebih jernih.\r\n\r\nVideo ini membahas tentang kedaulatan negara, tekanan ekonomi, pola sejarah, dan pentingnya rakyat tetap bersatu dalam menghadapi situasi yang penuh ket"
+      },
+      {
+        "comment_id": "UgwpVey8XZTn6TT3QX54AaABAg",
+        "video_part": "Part 1",
+        "comment_level": "top_level",
+        "like_count": 414,
+        "text_excerpt": "Di tengah situasi ekonomi dan geopolitik yang semakin panas, rakyat Indonesia perlu melihat kondisi ini dengan lebih jernih.\r\n\r\nVideo ini membahas tentang kedaulatan negara, tekanan ekonomi, pola sejarah, dan pentingnya rakyat tetap bersatu dalam menghadapi situasi yang penuh ket"
+      },
+      {
+        "comment_id": "UgwpVey8XZTn6TT3QX54AaABAg",
+        "video_part": "Part 1",
+        "comment_level": "top_level",
+        "like_count": 414,
+        "text_excerpt": "Di tengah situasi ekonomi dan geopolitik yang semakin panas, rakyat Indonesia perlu melihat kondisi ini dengan lebih jernih.\r\n\r\nVideo ini membahas tentang kedaulatan negara, tekanan ekonomi, pola sejarah, dan pentingnya rakyat tetap bersatu dalam menghadapi situasi yang penuh ket"
+      }
+    ],
+    "elite_politik": [
+      {
+        "comment_id": "UgyIYh8aAtO_9u20MUx4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 925,
+        "text_excerpt": "Video ini membongkar dugaan tekanan politik dan ekonomi terhadap Indonesia, mulai dari anomali IHSG dan Rupiah, peran elite global, hingga solusi agar Indonesia tetap berdaulat. Tonton videonya sampai selesai!\n\n#Indonesia #Prabowo #EkonomiIndonesia #Rupiah #IHSG #PolitikIndonesia"
+      },
+      {
+        "comment_id": "UgyIYh8aAtO_9u20MUx4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 925,
+        "text_excerpt": "Video ini membongkar dugaan tekanan politik dan ekonomi terhadap Indonesia, mulai dari anomali IHSG dan Rupiah, peran elite global, hingga solusi agar Indonesia tetap berdaulat. Tonton videonya sampai selesai!\n\n#Indonesia #Prabowo #EkonomiIndonesia #Rupiah #IHSG #PolitikIndonesia"
+      },
+      {
+        "comment_id": "UgyIYh8aAtO_9u20MUx4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 925,
+        "text_excerpt": "Video ini membongkar dugaan tekanan politik dan ekonomi terhadap Indonesia, mulai dari anomali IHSG dan Rupiah, peran elite global, hingga solusi agar Indonesia tetap berdaulat. Tonton videonya sampai selesai!\n\n#Indonesia #Prabowo #EkonomiIndonesia #Rupiah #IHSG #PolitikIndonesia"
+      }
+    ],
+    "feedback_video": [
+      {
+        "comment_id": "Ugxh7oWng4yZEaDJ-A54AaABAg",
+        "video_part": "Part 1",
+        "comment_level": "top_level",
+        "like_count": 773,
+        "text_excerpt": "Beruntunglah kalian yang bisa melihat video ini"
+      },
+      {
+        "comment_id": "UgwhuPNUifju0ma2ne94AaABAg",
+        "video_part": "Part 1",
+        "comment_level": "top_level",
+        "like_count": 407,
+        "text_excerpt": "Sayangnya, 95% orang indonesia males dengerin video 25 menit. 95% orang sini suka liat video\" potongan, baca berita\" kgk jelas, dll"
+      },
+      {
+        "comment_id": "UgwuVHQfw_Io9N1TiiJ4AaABAg",
+        "video_part": "Part 2",
+        "comment_level": "top_level",
+        "like_count": 240,
+        "text_excerpt": "Yang bisa menangkap penjelasan prof.. hanya orang yang positif energinya"
+      }
+    ]
+  },
+  "method_note": "Sentiment uses BERT or cached predictions. Issue/stance/action are rule-based weak-supervision outputs and need manual validation."
+}

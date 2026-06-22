@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masuk — Pantausentimen</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    :root {
+      --primary-color: #0F172A; /* Dark premium primary */
+      --primary-hover: #1E293B;
+      --accent-color: #2563EB; /* Bright blue for accents */
+      --bg-surface: #FFFFFF;
+      --bg-alt: #F8FAFC;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --input-bg: #F8FAFC;
+    }
+    
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--text-main);
+      background-color: var(--bg-surface);
+    }
+
+    /* SPLIT LAYOUT */
+    .login-layout {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      background-image: url('assets/Backroundlogin.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+    }
+
+    /* Background overlay for mobile (darkened for readability) */
+    .login-layout::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(15,23,42,0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1;
+      display: none; /* Only visible on mobile */
+    }
+
+    /* Kiri: Transparent spacer on desktop to show background */
+    .layout-left {
+      flex: 1.2;
+      position: relative;
+      z-index: 2;
+      display: none; /* hidden on small screens */
+    }
+
+    @media (min-width: 900px) {
+      .layout-left { display: block; }
+      
+      /* Subtle gradient transition from image to form on desktop */
+      .layout-left::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 100%);
+      }
+      
+      /* Desktop doesn't need the dark blur overlay */
+      .login-layout::before {
+        display: none;
+      }
+    }
+
+    /* Kanan: Form - Sleek, minimal, premium */
+    .layout-right {
+      flex: 1;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px;
+      background: var(--bg-surface);
+      position: relative;
+      z-index: 10;
+      box-shadow: -20px 0 40px rgba(0,0,0,0.08); 
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 899px) {
+      .login-layout {
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      /* Enable blur overlay on mobile so the image stays as a cool backdrop */
+      .login-layout::before {
+        display: block;
+      }
+
+      .layout-right {
+        max-width: 100%;
+        width: 100%;
+        max-width: 440px;
+        padding: 40px 32px;
+        border-radius: 24px; /* Becomes a floating card */
+        box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .layout-right {
+        padding: 32px 24px;
+        border-radius: 20px;
+      }
+      .auth-title { font-size: 22px; }
+      .auth-subtitle { font-size: 13px; margin-bottom: 24px; }
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+
+    .auth-title { 
+      font-size: 26px; 
+      font-weight: 700; 
+      margin: 0 0 6px; 
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+    }
+    
+    .auth-subtitle { 
+      color: var(--text-muted); 
+      font-size: 14px; 
+      margin-bottom: 32px; 
+      line-height: 1.5;
+    }
+
+    /* Modern Tabs */
+    .auth-tabs { 
+      display: flex; 
+      gap: 4px; 
+      background: var(--bg-alt); 
+      padding: 4px; 
+      border-radius: 12px; 
+      margin-bottom: 32px; 
+      border: 1px solid var(--border-color);
+    }
+    
+    .auth-tabs button {
+      flex: 1; 
+      border: 0; 
+      background: transparent; 
+      padding: 10px; 
+      border-radius: 8px;
+      font-weight: 600; 
+      font-size: 13px; 
+      cursor: pointer; 
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    
+    .auth-tabs button:hover:not(.active) { color: var(--text-main); }
+    .auth-tabs button.active { 
+      background: var(--bg-surface); 
+      color: var(--text-main); 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+      border: 1px solid var(--border-color);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%; 
+      border: 0; 
+      border-radius: 10px; 
+      padding: 12px 16px; 
+      font-size: 14px; 
+      font-weight: 600;
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+    
+    .btn--primary { 
+      background: var(--primary-color); 
+      color: #fff; 
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+    
+    .btn--primary:hover { 
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    
+    .btn--ghost { 
+      background: var(--bg-surface); 
+      color: var(--text-main); 
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    .btn--ghost:hover {
+      background: var(--bg-alt);
+      border-color: #CBD5E1;
+    }
+
+    /* Fields */
+    .field { margin-bottom: 20px; }
+    
+    .field label { 
+      display: block; 
+      font-size: 13px; 
+      font-weight: 600; 
+      margin-bottom: 8px; 
+      color: var(--text-main);
+    }
+    
+    .field input {
+      width: 100%; 
+      padding: 12px 14px; 
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px; 
+      font-size: 14px; 
+      font-family: inherit;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+    
+    .field input::placeholder { color: #94A3B8; }
+    .field input:focus { 
+      outline: none; 
+      background: var(--bg-surface);
+      border-color: var(--accent-color); 
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); 
+    }
+
+    .divider { 
+      display: flex; 
+      align-items: center; 
+      gap: 16px; 
+      color: var(--text-muted); 
+      font-size: 12px; 
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 24px 0; 
+    }
+    
+    .divider::before, .divider::after { 
+      content: ""; 
+      flex: 1; 
+      height: 1px; 
+      background: var(--border-color); 
+    }
+
+    .help { 
+      font-size: 13px; 
+      color: var(--text-muted); 
+      line-height: 1.5; 
+      margin-top: 10px; 
+    }
+
+    .auth-status { 
+      margin-top: 20px; 
+      font-size: 13px; 
+      min-height: 20px; 
+      color: var(--text-muted); 
+      font-weight: 500;
+    }
+    
+    .auth-status--error { color: #DC2626; }
+    .auth-status--success { color: #059669; }
+
+    .hint-box { 
+      background: var(--bg-alt); 
+      border: 1px solid var(--border-color);
+      border-radius: 10px; 
+      padding: 12px 16px; 
+      font-size: 13px; 
+      color: var(--text-muted); 
+      margin-bottom: 24px; 
+      line-height: 1.5;
+    }
+    .hint-box b { color: var(--text-main); }
+    
+    /* Animations */
+    #panel-login, #panel-register { animation: fadeIn 0.3s ease forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-layout">
+    <!-- Kiri: Area Background -->
+    <div class="layout-left"></div>
+
+    <!-- Kanan: Form Login -->
+    <div class="layout-right">
+      <div class="auth-card">
+        
+
+        <div class="auth-title">Masuk ke Dashboard</div>
+        <div class="auth-subtitle">Gunakan sidik jari laptop (Windows Hello) atau password</div>
+
+        <div class="auth-tabs">
+          <button data-tab="login" class="active">Masuk</button>
+          <button data-tab="register">Daftar Pengguna Baru</button>
+        </div>
+
+        <!-- ====== PANEL MASUK ====== -->
+        <div id="panel-login">
+          <button id="btnFingerprintLogin" class="btn btn--primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v4"/><path d="M12 11c-2.5 0-4.5 1-4.5 3"/><path d="M16.5 14c0-2-2-3-4.5-3"/><path d="M12 11c3 0 5-1.5 5-3"/><path d="M12 11c-3 0-5-1.5-5-3"/><path d="M17 8c0-3-2-5-5-5S7 5 7 8"/><path d="M7 8c0 3 2 5 5 5s5-2 5-5"/><path d="M12 11v4"/><path d="M12 15c-3 0-5 2-5 4"/><path d="M17 19c0-2-2-4-5-4"/></svg>
+            Masuk dengan Sidik Jari
+          </button>
+          <p id="fingerprintNote" class="help">
+            Klik tombol di atas, lalu sentuh sensor sidik jari di laptop Anda saat jendela Windows muncul.
+          </p>
+
+          <div class="divider">atau dengan password</div>
+
+          <div class="hint-box">
+            Akun bawaan untuk mencoba: <br><b>username: admin</b> &nbsp;•&nbsp; <b>password: admin123</b>
+          </div>
+
+          <div class="field">
+            <label for="loginUsername">Username</label>
+            <input id="loginUsername" type="text" autocomplete="username" value="admin">
+          </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" value="admin123">
+          </div>
+          <button id="btnPasswordLogin" class="btn btn--ghost">Masuk Dashboard</button>
+        </div>
+
+        <!-- ====== PANEL DAFTAR ====== -->
+        <div id="panel-register" style="display:none;">
+          <div class="field">
+            <label for="regDisplayName">Nama Lengkap</label>
+            <input id="regDisplayName" type="text" placeholder="mis. Budi Santoso">
+          </div>
+          <div class="field">
+            <label for="regUsername">Username</label>
+            <input id="regUsername" type="text" autocomplete="username" placeholder="mis. budi">
+          </div>
+          <div class="field">
+            <label for="regPassword">Password Cadangan</label>
+            <input id="regPassword" type="password" autocomplete="new-password" placeholder="minimal 4 karakter">
+            <p class="help" style="margin-top: 6px;">Password dipakai bila sidik jari tidak tersedia. Simpan baik-baik.</p>
+          </div>
+          <button id="btnRegister" class="btn btn--primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v4"/><path d="M12 11c-2.5 0-4.5 1-4.5 3"/><path d="M16.5 14c0-2-2-3-4.5-3"/><path d="M12 11c3 0 5-1.5 5-3"/><path d="M12 11c-3 0-5-1.5-5-3"/><path d="M17 8c0-3-2-5-5-5S7 5 7 8"/><path d="M7 8c0 3 2 5 5 5s5-2 5-5"/><path d="M12 11v4"/><path d="M12 15c-3 0-5 2-5 4"/><path d="M17 19c0-2-2-4-5-4"/></svg>
+            Daftar &amp; Rekam Sidik Jari
+          </button>
+          <p class="help">
+            Setelah klik, jendela Windows akan muncul — sentuh sensor sidik jari di laptop untuk merekam.
+            Tiap orang (Anda atau teman/mitra) bisa mendaftar di sini dengan akunnya sendiri.
+          </p>
+        </div>
+
+        <div id="authStatus" class="auth-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

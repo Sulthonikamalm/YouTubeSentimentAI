@@ -1,0 +1,324 @@
+/* -------------------------------------------------------------------------
+   17. Crawler Activity
+   ------------------------------------------------------------------------- */
+.crawler-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.crawler-stat {
+  text-align: center;
+  padding: 10px;
+  background: var(--color-neutral-soft);
+  border-radius: 8px;
+}
+
+.crawler-stat-value { font-size: 18px; font-weight: 700; color: var(--color-text); }
+.crawler-stat-label { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+
+.run-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.run-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--color-neutral-soft);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.run-item-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.run-item-status.success { background: var(--color-success); }
+.run-item-status.running { background: var(--color-primary); animation: pulse-dot 1.5s infinite; }
+.run-item-status.failed { background: var(--color-danger); }
+.run-item-time { color: var(--color-text-muted); width: 120px; flex-shrink: 0; }
+.run-item-detail { flex: 1; color: var(--color-text-secondary); }
+.run-item-units { color: var(--color-text-muted); font-weight: 500; flex-shrink: 0; }
+
+/* -------------------------------------------------------------------------
+   18. Crawl Progress Stepper
+   ------------------------------------------------------------------------- */
+.crawl-progress {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-soft);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.crawl-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.crawl-progress-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crawl-progress-title svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary);
+}
+
+.crawl-progress-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-chip);
+}
+
+.crawl-progress-badge.idle { background: var(--color-neutral-soft); color: var(--color-text-muted); }
+.crawl-progress-badge.running { background: var(--color-primary-soft); color: var(--color-primary); animation: pulse-dot 1.5s infinite; }
+.crawl-progress-badge.done { background: var(--color-success-soft); color: var(--color-success); }
+.crawl-progress-badge.error { background: var(--color-danger-soft); color: var(--color-danger); }
+
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
+}
+
+.stepper-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  text-align: center;
+}
+
+/* Connector line between steps */
+.stepper-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: calc(50% + 18px);
+  right: calc(-50% + 18px);
+  height: 2px;
+  background: var(--color-border);
+  z-index: 0;
+}
+
+.stepper-step.completed:not(:last-child)::after {
+  background: var(--color-success);
+}
+
+.stepper-step.active:not(:last-child)::after {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-border));
+}
+
+.stepper-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-neutral-soft);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.stepper-dot svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+}
+
+.stepper-step.completed .stepper-dot {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.stepper-step.completed .stepper-dot svg {
+  color: #fff;
+}
+
+.stepper-step.active .stepper-dot {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  animation: stepperPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes stepperPulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+.stepper-step.active .stepper-dot svg {
+  color: var(--color-primary);
+}
+
+.stepper-step.error .stepper-dot {
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger);
+}
+
+.stepper-step.error .stepper-dot svg {
+  color: var(--color-danger);
+}
+
+.stepper-label {
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.stepper-step.completed .stepper-label { color: var(--color-success); }
+.stepper-step.active .stepper-label { color: var(--color-primary); font-weight: 700; }
+.stepper-step.error .stepper-label { color: var(--color-danger); }
+
+.stepper-detail {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  max-width: 100px;
+}
+
+.stepper-step.active .stepper-detail {
+  color: var(--color-primary);
+}
+
+/* Active step spinner animation */
+.stepper-step.active .stepper-dot::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+/* -------------------------------------------------------------------------
+   19. Live Terminal Feed
+   ------------------------------------------------------------------------- */
+.terminal-card {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-card:hover {
+  transform: none;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 5px;
+  margin-right: 12px;
+}
+
+.terminal-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #475569;
+}
+
+.terminal-dots span:nth-child(1) { background: #ef4444; }
+.terminal-dots span:nth-child(2) { background: #eab308; }
+.terminal-dots span:nth-child(3) { background: #22c55e; }
+
+.terminal-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  font-family: monospace;
+}
+
+.terminal-body {
+  padding: 14px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  height: 220px;
+  overflow-y: auto;
+  background: #0f172a;
+}
+
+.terminal-line {
+  margin-bottom: 3px;
+  word-break: break-all;
+  animation: fade-in-up 0.3s ease forwards;
+}
+
+.terminal-line .time { color: #64748b; margin-right: 8px; }
+.terminal-line .info { color: #38bdf8; }
+.terminal-line .success { color: #22c55e; }
+.terminal-line .warning { color: #f59e0b; }
+.terminal-line .error { color: #ef4444; }
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse Indicator */
+.pulse-indicator {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+}
+
+.pulse-indicator.green { background: #22c55e; }
+.pulse-indicator.gray { background: #64748b; }
+.pulse-indicator.red { background: #ef4444; }
+
+.pulse-indicator.green::after,
+.pulse-indicator.red::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  animation: radar-pulse 1.5s linear infinite;
+}
+
+.pulse-indicator.green::after { border: 2px solid #22c55e; }
+.pulse-indicator.red::after { border: 2px solid #ef4444; }
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+

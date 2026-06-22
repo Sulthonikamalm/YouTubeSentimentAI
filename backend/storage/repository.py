@@ -287,7 +287,8 @@ def column_value_counts(column: str, database_url: str = None,
                         only_completed: bool = True,
                         project_id: Optional[str] = None,
                         video_id: Optional[str] = None,
-                        is_baseline: Optional[bool] = None) -> Dict[str, int]:
+                        is_baseline: Optional[bool] = None,
+                        owner_user_id: Optional[int] = None) -> Dict[str, int]:
     allowed = {"sentiment", "issue_label", "stance_label", "action_intent_label"}
     if column not in allowed:
         raise ValueError(f"column {column!r} not in allowed inference columns")
@@ -298,6 +299,12 @@ def column_value_counts(column: str, database_url: str = None,
     if project_id:
         clauses.append("video_id IN (SELECT video_id FROM videos WHERE project_id = ?)")
         params.append(project_id)
+    if owner_user_id is not None:
+        clauses.append(
+            "video_id IN (SELECT v.video_id FROM videos v JOIN projects p "
+            "ON p.project_id = v.project_id WHERE p.owner_user_id = ?)"
+        )
+        params.append(owner_user_id)
     if video_id:
         clauses.append("video_id = ?")
         params.append(video_id)

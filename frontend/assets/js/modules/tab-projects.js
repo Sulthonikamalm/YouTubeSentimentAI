@@ -61,8 +61,10 @@
           });
         });
       }
+      return data;
     } catch (err) {
       console.error("Gagal memuat projects:", err);
+      throw err;
     }
   }
 
@@ -104,7 +106,12 @@
           $("newProjectDesc").value = "";
           $("newProjectGoalType").value = "";
           $("newProjectGoalText").value = "";
-          loadProjects();
+          await loadProjects();
+          if (window.MainState) window.MainState.selectedProjectId = r.project_id;
+          if ($("globalProjectSelect")) $("globalProjectSelect").value = r.project_id;
+          if ($("inputVideoProject")) $("inputVideoProject").value = r.project_id;
+          $("manageProjectsModal").classList.remove("open");
+          window.openAddVideoModal?.();
         }
       } catch(err) {
         showToast("error", "Gagal", err.message);

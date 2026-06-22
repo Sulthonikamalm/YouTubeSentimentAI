@@ -189,6 +189,11 @@ def init_db(database_url: str = None) -> None:
                 if active:
                     # Normalize old comma-based version rows and repair status drift.
                     conn.execute(
+                        "UPDATE project_taxonomy_versions SET status = 'archived' "
+                        "WHERE project_id = ? AND status = 'active' AND version_id != ?",
+                        (project_id, active_id),
+                    )
+                    conn.execute(
                         "UPDATE project_taxonomy_versions SET status = 'active', "
                         "issue_labels = ?, stance_labels = ?, action_labels = ?, "
                         "updated_at = COALESCE(updated_at, created_at), "

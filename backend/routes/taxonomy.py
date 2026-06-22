@@ -1,181 +1,222 @@
-"""
-routes/taxonomy.py — Project taxonomy configuration and generation routes.
-"""
+"""Owner-scoped project taxonomy generation, editing, and activation routes."""
+
+from __future__ import annotations
 
 import logging
-from flask import Blueprint, request
+import uuid
+from datetime import datetime, timezone
 
-from backend.routes import ok, err, get_db_url
-from backend.storage.db import get_db_connection
+from flask import Blueprint, request, session
+
+from backend.routes import err, get_db_url, get_owned_project, ok
 from backend.services.gemini_service import generate_taxonomy_draft
+from backend.services.taxonomy_config import dumps_labels, parse_labels, validate_config
+from backend.storage.db import get_db_connection
 
 logger = logging.getLogger("youtube_collector.taxonomy")
-
 taxonomy_bp = Blueprint("taxonomy", __name__, url_prefix="/api")
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _serialize_version(row) -> dict:
+    data = dict(row)
+    for field in ("issue_labels", "stance_labels", "action_labels"):
+        data[field] = parse_labels(data.get(field))
+    return data
+
+
+def _mark_project_comments_pending(conn, project_id: str) -> int:
+    result = conn.execute(
+        "UPDATE comments SET inference_status = 'pending', sentiment = NULL, "
+        "sentiment_confidence = NULL, issue_label = NULL, stance_label = NULL, "
+        "action_intent_label = NULL, interpretation_short = NULL, model_version = NULL, "
+        "inference_error = NULL, inferred_at = NULL, taxonomy_version_id = NULL "
+        "WHERE is_manually_corrected = 0 AND video_id IN "
+        "(SELECT video_id FROM videos WHERE project_id = ?)",
+        (project_id,),
+    )
+    return result.rowcount
+
+
+def _activate(project_id: str, version_id: str, reprocess: bool) -> tuple[dict, int]:
+    db_url = get_db_url()
+    with get_db_connection(db_url) as conn:
+        with conn:
+            target = conn.execute(
+                "SELECT * FROM project_taxonomy_versions WHERE project_id = ? AND version_id = ?",
+                (project_id, version_id),
+            ).fetchone()
+            if not target:
+                raise LookupError("Version not found")
+            if target["status"] not in ("draft", "active"):
+                raise ValueError("Hanya draft yang dapat diaktifkan.")
+
+            config = validate_config(
+                target["prompt_context"], target["issue_labels"],
+                target["stance_labels"], target["action_labels"],
+            )
+            now = _now()
+            conn.execute(
+                "UPDATE project_taxonomy_versions SET status = 'archived', updated_at = ? "
+                "WHERE project_id = ? AND status = 'active' AND version_id != ?",
+                (now, project_id, version_id),
+            )
+            conn.execute(
+                "UPDATE project_taxonomy_versions SET status = 'active', activated_at = COALESCE(activated_at, ?), updated_at = ? "
+                "WHERE project_id = ? AND version_id = ?",
+                (now, now, project_id, version_id),
+            )
+            conn.execute(
+                "UPDATE projects SET active_taxonomy_version_id = ?, status = 'active', "
+                "prompt_context = ?, issue_labels = ?, stance_labels = ?, action_labels = ?, updated_at = ? "
+                "WHERE project_id = ?",
+                (
+                    version_id, config["prompt_context"], dumps_labels(config["issues"]),
+                    dumps_labels(config["stances"]), dumps_labels(config["actions"]),
+                    now, project_id,
+                ),
+            )
+            affected = _mark_project_comments_pending(conn, project_id) if reprocess else 0
+    return config, affected
 
 
 @taxonomy_bp.route("/projects/<project_id>/taxonomy/generate", methods=["POST"])
 def generate_taxonomy(project_id):
-    from flask import session
-    from backend.storage.projects_repo import get_project
-    user_id = session.get("user_id")
-    project = get_project(project_id, get_db_url())
-    if not project:
+    if not get_owned_project(project_id):
         return err("Project not found", 404)
-    if project.get("owner_user_id") != user_id and project_id != "default_politik":
-        return err("Project not found", 404)
-
     data = request.get_json() or {}
-    instructions = data.get("instructions")
-    
-    try:
-        result = generate_taxonomy_draft(project_id, instructions, get_db_url())
-        if not result["success"]:
-            return err(result["error"], 400)
+    result = generate_taxonomy_draft(project_id, data.get("instructions"), get_db_url())
+    if result.get("success"):
         return ok(result)
-    except Exception as e:
-        logger.error(f"Generate taxonomy error: {e}")
-        return err(str(e))
+    status_by_code = {
+        "already_running": 409,
+        "quota_exceeded": 429,
+        "daily_limit": 429,
+        "timeout": 504,
+        "provider_error": 503,
+        "dependency_missing": 503,
+        "not_found": 404,
+    }
+    return err(result.get("error", "Generate taxonomy gagal."), status_by_code.get(result.get("error_code"), 400))
 
 
 @taxonomy_bp.route("/projects/<project_id>/taxonomy/versions", methods=["GET"])
 def get_versions(project_id):
-    from flask import session
-    from backend.storage.projects_repo import get_project
-    user_id = session.get("user_id")
-    project = get_project(project_id, get_db_url())
-    if not project:
+    if not get_owned_project(project_id):
         return err("Project not found", 404)
-    if project.get("owner_user_id") != user_id and project_id != "default_politik":
-        return err("Project not found", 404)
+    with get_db_connection(get_db_url()) as conn:
+        rows = conn.execute(
+            "SELECT * FROM project_taxonomy_versions WHERE project_id = ? "
+            "ORDER BY created_at DESC",
+            (project_id,),
+        ).fetchall()
+    return ok({"versions": [_serialize_version(row) for row in rows]})
 
+
+@taxonomy_bp.route("/projects/<project_id>/taxonomy/versions", methods=["POST"])
+def create_manual_version(project_id):
+    if not get_owned_project(project_id):
+        return err("Project not found", 404)
+    data = request.get_json() or {}
     try:
-        with get_db_connection(get_db_url()) as conn:
-            rows = conn.execute(
-                "SELECT version_id, status, source, prompt_context, issue_labels, stance_labels, action_labels, regenerate_instruction, created_at "
-                "FROM project_taxonomy_versions WHERE project_id = ? ORDER BY created_at DESC",
-                (project_id,)
-            ).fetchall()
-        return ok({"versions": [dict(r) for r in rows]})
-    except Exception as e:
-        return err(str(e))
+        config = validate_config(
+            data.get("prompt_context"), data.get("issue_labels"),
+            data.get("stance_labels"), data.get("action_labels"),
+        )
+    except ValueError as exc:
+        return err(str(exc), 400)
+    version_id = f"{project_id}_v_{uuid.uuid4().hex[:10]}"
+    now = _now()
+    with get_db_connection(get_db_url()) as conn:
+        with conn:
+            conn.execute(
+                "INSERT INTO project_taxonomy_versions "
+                "(version_id, project_id, status, source, prompt_context, issue_labels, "
+                "stance_labels, action_labels, created_by, created_at, updated_at) "
+                "VALUES (?, ?, 'draft', 'manual', ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    version_id, project_id, config["prompt_context"],
+                    dumps_labels(config["issues"]), dumps_labels(config["stances"]),
+                    dumps_labels(config["actions"]), session.get("user_id"), now, now,
+                ),
+            )
+    return ok({"success": True, "version_id": version_id}, 201)
 
 
 @taxonomy_bp.route("/projects/<project_id>/taxonomy/versions/<version_id>", methods=["PATCH"])
 def edit_version(project_id, version_id):
-    from flask import session
-    from backend.storage.projects_repo import get_project
-    user_id = session.get("user_id")
-    project = get_project(project_id, get_db_url())
-    if not project:
+    if not get_owned_project(project_id):
         return err("Project not found", 404)
-    if project.get("owner_user_id") != user_id and project_id != "default_politik":
-        return err("Project not found", 404)
-
     data = request.get_json() or {}
-    prompt_context = data.get("prompt_context")
-    issue_labels = data.get("issue_labels")
-    stance_labels = data.get("stance_labels")
-    action_labels = data.get("action_labels")
-    
-    try:
-        with get_db_connection(get_db_url()) as conn:
-            with conn:
-                # Update only if it's still a draft
-                res = conn.execute(
-                    "UPDATE project_taxonomy_versions "
-                    "SET prompt_context = COALESCE(?, prompt_context), "
-                    "issue_labels = COALESCE(?, issue_labels), "
-                    "stance_labels = COALESCE(?, stance_labels), "
-                    "action_labels = COALESCE(?, action_labels) "
-                    "WHERE project_id = ? AND version_id = ? AND status = 'draft'",
-                    (prompt_context, issue_labels, stance_labels, action_labels, project_id, version_id)
-                )
-                if res.rowcount == 0:
-                    return err("Draft not found or already activated.", 404)
-        return ok({"success": True})
-    except Exception as e:
-        return err(str(e))
+    with get_db_connection(get_db_url()) as conn:
+        current = conn.execute(
+            "SELECT * FROM project_taxonomy_versions WHERE project_id = ? AND version_id = ? AND status = 'draft'",
+            (project_id, version_id),
+        ).fetchone()
+        if not current:
+            return err("Draft not found or already activated.", 404)
+        try:
+            config = validate_config(
+                data.get("prompt_context", current["prompt_context"]),
+                data.get("issue_labels", current["issue_labels"]),
+                data.get("stance_labels", current["stance_labels"]),
+                data.get("action_labels", current["action_labels"]),
+            )
+        except ValueError as exc:
+            return err(str(exc), 400)
+        with conn:
+            conn.execute(
+                "UPDATE project_taxonomy_versions SET source = 'manual', prompt_context = ?, "
+                "issue_labels = ?, stance_labels = ?, action_labels = ?, updated_at = ? "
+                "WHERE project_id = ? AND version_id = ? AND status = 'draft'",
+                (
+                    config["prompt_context"], dumps_labels(config["issues"]),
+                    dumps_labels(config["stances"]), dumps_labels(config["actions"]),
+                    _now(), project_id, version_id,
+                ),
+            )
+    return ok({"success": True, "version": {"version_id": version_id, **config}})
 
 
 @taxonomy_bp.route("/projects/<project_id>/taxonomy/versions/<version_id>/activate", methods=["POST"])
 def activate_version(project_id, version_id):
-    from flask import session
-    from backend.storage.projects_repo import get_project
-    user_id = session.get("user_id")
-    project = get_project(project_id, get_db_url())
-    if not project:
+    if not get_owned_project(project_id):
         return err("Project not found", 404)
-    if project.get("owner_user_id") != user_id and project_id != "default_politik":
-        return err("Project not found", 404)
-
-    data = request.get_json() or {}
-    reprocess_all = data.get("reprocess_all", False)
-    
+    reprocess = bool((request.get_json() or {}).get("reprocess_all", False))
     try:
-        with get_db_connection(get_db_url()) as conn:
-            with conn:
-                # Archive currently active
-                conn.execute(
-                    "UPDATE project_taxonomy_versions SET status = 'archived' "
-                    "WHERE project_id = ? AND status = 'active'",
-                    (project_id,)
-                )
-                
-                # Activate new version
-                res = conn.execute(
-                    "UPDATE project_taxonomy_versions SET status = 'active' "
-                    "WHERE project_id = ? AND version_id = ?",
-                    (project_id, version_id)
-                )
-                if res.rowcount == 0:
-                    return err("Version not found.", 404)
-                    
-                # Update project table
-                # Also fetch the labels to update the project table for legacy compatibility
-                v_data = conn.execute(
-                    "SELECT prompt_context, issue_labels, stance_labels, action_labels "
-                    "FROM project_taxonomy_versions WHERE version_id = ?",
-                    (version_id,)
-                ).fetchone()
-                
-                conn.execute(
-                    "UPDATE projects SET active_taxonomy_version_id = ?, status = 'active', "
-                    "prompt_context = ?, issue_labels = ?, stance_labels = ?, action_labels = ? "
-                    "WHERE project_id = ?",
-                    (version_id, v_data["prompt_context"], v_data["issue_labels"], v_data["stance_labels"], v_data["action_labels"], project_id)
-                )
+        _, affected = _activate(project_id, version_id, reprocess)
+    except LookupError:
+        return err("Version not found.", 404)
+    except ValueError as exc:
+        return err(str(exc), 400)
+    return ok({"success": True, "reprocess_all": reprocess, "comments_queued": affected})
 
-        return ok({"success": True})
-    except Exception as e:
-        logger.error(f"Activate version error: {e}")
-        return err(str(e))
+
+@taxonomy_bp.route("/projects/<project_id>/taxonomy/versions/<version_id>/reprocess", methods=["POST"])
+def activate_and_reprocess(project_id, version_id):
+    if not get_owned_project(project_id):
+        return err("Project not found", 404)
+    try:
+        _, affected = _activate(project_id, version_id, True)
+    except LookupError:
+        return err("Version not found.", 404)
+    except ValueError as exc:
+        return err(str(exc), 400)
+    return ok({"success": True, "comments_queued": affected})
+
 
 @taxonomy_bp.route("/projects/<project_id>/taxonomy/reprocess", methods=["POST"])
-def reprocess_comments(project_id):
-    from flask import session
-    from backend.storage.projects_repo import get_project
-    user_id = session.get("user_id")
-    project = get_project(project_id, get_db_url())
+def reprocess_active(project_id):
+    project = get_owned_project(project_id)
     if not project:
         return err("Project not found", 404)
-    if project.get("owner_user_id") != user_id and project_id != "default_politik":
-        return err("Project not found", 404)
-
-    try:
-        with get_db_connection(get_db_url()) as conn:
-            with conn:
-                videos = conn.execute("SELECT video_id FROM videos WHERE project_id = ?", (project_id,)).fetchall()
-                for v in videos:
-                    conn.execute(
-                        "UPDATE comments SET inference_status = 'pending', "
-                        "sentiment = NULL, sentiment_confidence = NULL, "
-                        "issue_label = NULL, stance_label = NULL, action_intent_label = NULL, "
-                        "interpretation_short = NULL, model_version = NULL, taxonomy_version_id = NULL "
-                        "WHERE video_id = ?",
-                        (v["video_id"],)
-                    )
-        return ok({"success": True, "message": "Comments marked for reprocessing"})
-    except Exception as e:
-        logger.error(f"Reprocess comments error: {e}")
-        return err(str(e))
+    active_id = project.get("active_taxonomy_version_id")
+    if not active_id:
+        return err("Project belum memiliki taxonomy aktif.", 400)
+    with get_db_connection(get_db_url()) as conn:
+        with conn:
+            affected = _mark_project_comments_pending(conn, project_id)
+    return ok({"success": True, "comments_queued": affected})

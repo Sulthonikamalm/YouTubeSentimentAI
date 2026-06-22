@@ -1,245 +1,256 @@
-/**
- * tab-taxonomy.js — Logic for Taxonomy AI view
- */
+/** Project taxonomy generation, review, manual editing, and activation. */
 (() => {
   "use strict";
 
   const { apiFetch } = window.API;
-  const { $, $$, showToast, escapeHtml } = window.UI;
+  const { $, showToast, escapeHtml } = window.UI;
+  let currentDraft = null;
+
+  const parseLabels = value => {
+    if (Array.isArray(value)) return value;
+    if (!value) return [];
+    try { return JSON.parse(value); } catch { return String(value).split(",").filter(Boolean).map(key => ({ key, name: key, description: "", examples: [] })); }
+  };
+
+  const displayDate = value => value ? new Date(value).toLocaleString("id-ID") : "-";
+
+  function labelPills(labels) {
+    return parseLabels(labels).map(label => `
+      <span title="${escapeHtml(label.description || "")}" style="display:inline-block;background:var(--color-border);padding:4px 7px;border-radius:5px;margin:2px;font-size:11px;">
+        ${escapeHtml(label.name || label.key)}
+      </span>`).join("");
+  }
+
+  function renderActive(version) {
+    const root = $("taxonomyActiveSection");
+    if (!version) { root.style.display = "none"; root.innerHTML = ""; return; }
+    root.style.display = "block";
+    root.innerHTML = `
+      <div style="border:1px solid var(--color-border);border-radius:8px;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 16px;background:var(--color-bg);border-bottom:1px solid var(--color-border);">
+          <div><strong>Taxonomy Aktif</strong><div class="help-text">${escapeHtml(version.version_id)} · ${displayDate(version.activated_at || version.created_at)}</div></div>
+          <span style="align-self:center;color:var(--color-success);font-size:12px;font-weight:700;">AKTIF</span>
+        </div>
+        <div style="padding:16px;">
+          <div class="form-group"><label>Konteks</label><p style="white-space:pre-wrap;margin:6px 0 16px;">${escapeHtml(version.prompt_context || "-")}</p></div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">
+            <div><strong style="font-size:12px;">Issue</strong><div>${labelPills(version.issue_labels)}</div></div>
+            <div><strong style="font-size:12px;">Stance</strong><div>${labelPills(version.stance_labels)}</div></div>
+            <div><strong style="font-size:12px;">Action</strong><div>${labelPills(version.action_labels)}</div></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function labelRows(axis, labels) {
+    return parseLabels(labels).map((label, index) => `
+      <div class="taxonomy-label-row" data-axis="${axis}" data-index="${index}" style="display:grid;grid-template-columns:150px 170px minmax(220px,1fr) 170px 34px;gap:8px;align-items:start;margin-bottom:8px;">
+        <input class="form-control label-key" value="${escapeHtml(label.key || "")}" placeholder="key_label">
+        <input class="form-control label-name" value="${escapeHtml(label.name || "")}" placeholder="Nama label">
+        <input class="form-control label-description" value="${escapeHtml(label.description || "")}" placeholder="Kapan label ini digunakan">
+        <input class="form-control label-examples" value="${escapeHtml((label.examples || []).join("; "))}" placeholder="contoh 1; contoh 2">
+        <button type="button" class="btn btn-ghost btn-remove-label" title="Hapus label" style="color:var(--color-danger);padding:8px;">×</button>
+      </div>`).join("");
+  }
+
+  function axisEditor(axis, title, labels) {
+    return `
+      <section style="margin-top:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div><strong>${title}</strong><span class="help-text" style="margin-left:8px;">key, nama, deskripsi, dan contoh</span></div>
+          <button type="button" class="btn btn-secondary btn-sm btn-add-label" data-axis="${axis}">+ Tambah</button>
+        </div>
+        <div id="taxonomyRows-${axis}">${labelRows(axis, labels)}</div>
+      </section>`;
+  }
+
+  function collectAxis(axis) {
+    return Array.from(document.querySelectorAll(`.taxonomy-label-row[data-axis="${axis}"]`)).map(row => ({
+      key: row.querySelector(".label-key").value.trim(),
+      name: row.querySelector(".label-name").value.trim(),
+      description: row.querySelector(".label-description").value.trim(),
+      examples: row.querySelector(".label-examples").value.split(";").map(item => item.trim()).filter(Boolean),
+    }));
+  }
+
+  function bindEditorRows() {
+    document.querySelectorAll(".btn-remove-label").forEach(button => button.addEventListener("click", () => button.closest(".taxonomy-label-row").remove()));
+    document.querySelectorAll(".btn-add-label").forEach(button => button.addEventListener("click", () => {
+      const axis = button.dataset.axis;
+      const holder = $(`taxonomyRows-${axis}`);
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = labelRows(axis, [{ key: "", name: "", description: "", examples: [] }]);
+      holder.appendChild(wrapper.firstElementChild);
+      bindEditorRows();
+    }));
+  }
+
+  function diffSummary(previous, next) {
+    if (!previous || previous.version_id === next.version_id) return "";
+    const changes = [];
+    [["issue_labels", "issue"], ["stance_labels", "stance"], ["action_labels", "action"]].forEach(([field, name]) => {
+      const before = new Set(parseLabels(previous[field]).map(item => item.key));
+      const after = new Set(parseLabels(next[field]).map(item => item.key));
+      const added = [...after].filter(key => !before.has(key));
+      const removed = [...before].filter(key => !after.has(key));
+      if (added.length) changes.push(`${name} ditambah: ${added.join(", ")}`);
+      if (removed.length) changes.push(`${name} dihapus: ${removed.join(", ")}`);
+    });
+    return changes.length ? `<div class="alert alert-info" style="margin-bottom:14px;"><strong>Perubahan draft terbaru</strong><br>${changes.map(escapeHtml).join("<br>")}</div>` : "";
+  }
+
+  function renderDraft(version, previousDraft) {
+    document.getElementById("taxonomyDraftEditor")?.remove();
+    currentDraft = version;
+    if (!version) return;
+
+    const root = document.createElement("div");
+    root.id = "taxonomyDraftEditor";
+    root.style = "border:1px solid var(--color-warning);border-radius:8px;margin-top:20px;padding:16px;overflow:auto;";
+    root.innerHTML = `
+      ${diffSummary(previousDraft, version)}
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;">
+        <div><h3 style="margin:0 0 4px;font-size:16px;">Review Draft</h3><div class="help-text">${escapeHtml(version.version_id)} · belum memengaruhi analisis</div></div>
+        <button class="btn btn-primary btn-sm" id="btnSaveDraftManual">Simpan edit</button>
+      </div>
+      <div class="form-group" style="margin-top:16px;"><label>Konteks project</label><textarea id="editDraftPrompt" class="form-control" rows="5">${escapeHtml(version.prompt_context || "")}</textarea></div>
+      ${axisEditor("issues", "Issue", version.issue_labels)}
+      ${axisEditor("stances", "Stance", version.stance_labels)}
+      ${axisEditor("actions", "Action intent", version.action_labels)}
+      <div style="display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:8px;margin-top:20px;">
+        <input id="regenerateInstructions" class="form-control" placeholder="Contoh: pisahkan harga pangan dan lapangan kerja">
+        <button class="btn btn-secondary" id="btnRegenerateDraft">Generate ulang penuh</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--color-border);">
+        <button class="btn btn-primary" id="btnActivateNewOnly">Aktifkan untuk komentar baru</button>
+        <button class="btn btn-secondary" id="btnActivateReprocess">Aktifkan & analisis ulang</button>
+      </div>`;
+    $("taxonomyGenerateSection").after(root);
+    bindEditorRows();
+
+    $("btnSaveDraftManual").addEventListener("click", saveDraft);
+    $("btnRegenerateDraft").addEventListener("click", () => generateTaxonomy($("regenerateInstructions").value));
+    $("btnActivateNewOnly").addEventListener("click", () => activateDraft(false));
+    $("btnActivateReprocess").addEventListener("click", () => activateDraft(true));
+  }
+
+  async function saveDraft() {
+    try {
+      await apiFetch(`/projects/${window.MainState.selectedProjectId}/taxonomy/versions/${currentDraft.version_id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          prompt_context: $("editDraftPrompt").value,
+          issue_labels: collectAxis("issues"),
+          stance_labels: collectAxis("stances"),
+          action_labels: collectAxis("actions"),
+        }),
+      });
+      showToast("success", "Draft disimpan", "Perubahan manual telah disimpan.");
+      loadTaxonomy();
+    } catch (error) { showToast("error", "Draft tidak valid", error.message); }
+  }
+
+  async function activateDraft(reprocess) {
+    const message = reprocess
+      ? "Aktifkan taxonomy dan antrekan ulang seluruh komentar yang belum dikoreksi manual?"
+      : "Aktifkan taxonomy hanya untuk analisis berikutnya?";
+    if (!confirm(message)) return;
+    try {
+      const result = await apiFetch(`/projects/${window.MainState.selectedProjectId}/taxonomy/versions/${currentDraft.version_id}/activate`, {
+        method: "POST", body: JSON.stringify({ reprocess_all: reprocess }),
+      });
+      showToast("success", "Taxonomy aktif", reprocess ? `${result.comments_queued || 0} komentar masuk antrean ulang.` : "Komentar lama tidak diubah.");
+      loadTaxonomy();
+    } catch (error) { showToast("error", "Aktivasi gagal", error.message); }
+  }
+
+  async function generateTaxonomy(instructions = "") {
+    const projectId = window.MainState?.selectedProjectId;
+    if (!projectId) return;
+    const button = $("btnGenerateTaxonomy");
+    const oldHtml = button.innerHTML;
+    button.disabled = true;
+    button.textContent = "Menyusun draft...";
+    try {
+      const result = await apiFetch(`/projects/${projectId}/taxonomy/generate`, {
+        method: "POST", body: JSON.stringify({ instructions }),
+      });
+      showToast("success", "Draft tersedia", result.cache_hit ? "Draft identik dimuat dari cache." : "Gemini membuat draft baru.");
+      loadTaxonomy();
+    } catch (error) { showToast("error", "Generate gagal", error.message); }
+    finally { button.innerHTML = oldHtml; button.disabled = false; }
+  }
+
+  const manualTemplate = {
+    prompt_context: "Kelompokkan komentar berdasarkan tujuan project. Gunakan konteks video dan isi komentar tanpa mengarang maksud yang tidak dinyatakan.",
+    issue_labels: [
+      { key: "topik_utama", name: "Topik Utama", description: "Pembahasan langsung mengenai topik utama video.", examples: [] },
+      { key: "keluhan", name: "Keluhan", description: "Masalah atau pengalaman negatif yang disampaikan komentator.", examples: [] },
+      { key: "saran", name: "Saran", description: "Usulan perbaikan atau kebutuhan yang disampaikan komentator.", examples: [] },
+      { key: "pertanyaan", name: "Pertanyaan", description: "Permintaan informasi atau klarifikasi dari komentator.", examples: [] },
+      { key: "lainnya", name: "Lainnya", description: "Topik lain yang tidak sesuai dengan issue khusus.", examples: [] },
+    ],
+    stance_labels: [
+      { key: "mendukung", name: "Mendukung", description: "Komentator menunjukkan dukungan yang dapat dikenali.", examples: [] },
+      { key: "menolak", name: "Menolak", description: "Komentator menunjukkan penolakan atau kritik yang dapat dikenali.", examples: [] },
+      { key: "tidak_terdeteksi", name: "Tidak Terdeteksi", description: "Posisi komentator tidak dapat ditentukan.", examples: [] },
+    ],
+    action_labels: [
+      { key: "keluhan", name: "Keluhan", description: "Komentator menyampaikan masalah yang dialami atau diamati.", examples: [] },
+      { key: "saran", name: "Saran", description: "Komentator mengusulkan tindakan atau perbaikan.", examples: [] },
+      { key: "ajakan_aksi", name: "Ajakan Aksi", description: "Komentator mengajak pihak lain melakukan tindakan tertentu.", examples: [] },
+      { key: "tidak_terdeteksi", name: "Tidak Terdeteksi", description: "Niat tindakan tidak dapat ditentukan.", examples: [] },
+    ],
+  };
+
+  async function createManualDraft() {
+    const projectId = window.MainState?.selectedProjectId;
+    if (!projectId) return;
+    const button = $("btnCreateManualTaxonomy");
+    button.disabled = true;
+    try {
+      await apiFetch(`/projects/${projectId}/taxonomy/versions`, {
+        method: "POST", body: JSON.stringify(manualTemplate),
+      });
+      showToast("success", "Draft manual tersedia", "Label awal dapat langsung Anda ubah sebelum diaktifkan.");
+      loadTaxonomy();
+    } catch (error) { showToast("error", "Draft gagal dibuat", error.message); }
+    finally { button.disabled = false; }
+  }
 
   async function loadTaxonomy() {
-    const pid = window.MainState?.selectedProjectId;
-    if (!pid) {
+    const projectId = window.MainState?.selectedProjectId;
+    if (!projectId) {
       $("taxonomyEmptyState").style.display = "block";
       $("taxonomyContent").style.display = "none";
       return;
     }
-    
     $("taxonomyEmptyState").style.display = "none";
     $("taxonomyContent").style.display = "block";
-    
-    // Load Project details for sample count
     try {
-      const pRes = await apiFetch(`/projects/${pid}`);
-      const sampleCount = pRes.project.valid_sample_count || 0;
-      
-      const infoEl = $("taxonomySampleInfo");
-      if (sampleCount < 20) {
-        infoEl.innerHTML = `<span style="color:var(--color-warning);">⚠️ Project ini baru memiliki ${sampleCount} komentar valid. Dibutuhkan minimal 20 komentar untuk membuat taxonomy otomatis.</span>`;
-        $("btnGenerateTaxonomy").disabled = true;
-      } else {
-        infoEl.innerHTML = `<span style="color:var(--color-success);">✓ Project memiliki ${sampleCount} komentar valid (cukup untuk ditarik sampel).</span>`;
-        $("btnGenerateTaxonomy").disabled = false;
-      }
-      
-      // Load Versions
-      const vRes = await apiFetch(`/projects/${pid}/taxonomy/versions`);
-      const versions = vRes.versions || [];
-      
-      const activeVersion = versions.find(v => v.status === "active");
-      const draftVersion = versions.find(v => v.status === "draft");
-      
-      if (activeVersion) {
-        $("taxonomyActiveSection").style.display = "block";
-        renderActiveTaxonomy(activeVersion);
-      } else {
-        $("taxonomyActiveSection").style.display = "none";
-      }
-      
-      if (draftVersion) {
-        // Show draft edit form
-        renderDraftTaxonomy(draftVersion);
-      } else {
-        // Hide draft form if no draft
-        const oldDraft = $("taxonomyDraftEditor");
-        if (oldDraft) oldDraft.remove();
-      }
-      
-    } catch (err) {
-      showToast("error", "Error Memuat Taxonomy", err.message);
-    }
-  }
+      const [projectResult, versionsResult] = await Promise.all([
+        apiFetch(`/projects/${projectId}`),
+        apiFetch(`/projects/${projectId}/taxonomy/versions`),
+      ]);
+      const count = projectResult.project.valid_sample_count || 0;
+      const generateButton = $("btnGenerateTaxonomy");
+      generateButton.disabled = count < 20;
+      $("taxonomySampleInfo").textContent = count < 20
+        ? `${count}/20 komentar valid. Jalankan crawl terlebih dahulu.`
+        : `${count} komentar valid tersedia; maksimal 100 akan dijadikan sampel.`;
 
-  function formatLabels(jsonStr) {
-    if (!jsonStr) return "";
-    try {
-      const arr = JSON.parse(jsonStr);
-      return arr.map(l => `<span style="display:inline-block;background:var(--color-border);padding:2px 6px;border-radius:4px;margin:2px;" title="${escapeHtml(l.description || '')}">${escapeHtml(l.name || l.key)}</span>`).join("");
-    } catch(e) {
-      return jsonStr.split(",").map(l => `<span style="display:inline-block;background:var(--color-border);padding:2px 6px;border-radius:4px;margin:2px;">${escapeHtml(l)}</span>`).join("");
-    }
-  }
-
-  function renderActiveTaxonomy(v) {
-    const container = $("taxonomyActiveSection");
-    container.innerHTML = `
-      <div style="border:1px solid var(--color-border); border-radius:8px; overflow:hidden;">
-        <div style="background:var(--color-bg); padding:12px 16px; border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <h4 style="margin:0; font-size:14px;">Taxonomy Aktif</h4>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Versi: ${v.version_id} • Dibuat: ${new Date(v.created_at).toLocaleString()}</div>
-          </div>
-          <span style="background:var(--color-success); color:#fff; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600;">ACTIVE</span>
-        </div>
-        <div style="padding:16px;">
-          <div style="margin-bottom:12px;">
-            <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Prompt Context</div>
-            <div style="background:var(--color-bg); padding:10px; border-radius:6px; font-family:monospace; font-size:12px; white-space:pre-wrap;">${escapeHtml(v.prompt_context || "-")}</div>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-            <div>
-              <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Issues</div>
-              <div style="background:var(--color-bg); padding:10px; border-radius:6px; font-size:12px;">${formatLabels(v.issue_labels)}</div>
-            </div>
-            <div>
-              <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Stances</div>
-              <div style="background:var(--color-bg); padding:10px; border-radius:6px; font-size:12px;">${formatLabels(v.stance_labels)}</div>
-            </div>
-            <div>
-              <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Actions</div>
-              <div style="background:var(--color-bg); padding:10px; border-radius:6px; font-size:12px;">${formatLabels(v.action_labels)}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderDraftTaxonomy(v) {
-    try {
-      if (v.issue_labels && !v.issue_labels.startsWith("[")) {
-        v.issue_labels = JSON.stringify(v.issue_labels.split(",").map(k => ({key: k, name: k, description: ""})));
-      }
-      if (v.stance_labels && !v.stance_labels.startsWith("[")) {
-        v.stance_labels = JSON.stringify(v.stance_labels.split(",").map(k => ({key: k, name: k, description: ""})));
-      }
-      if (v.action_labels && !v.action_labels.startsWith("[")) {
-        v.action_labels = JSON.stringify(v.action_labels.split(",").map(k => ({key: k, name: k, description: ""})));
-      }
-      // Pretty print JSON for textarea
-      v.issue_labels = JSON.stringify(JSON.parse(v.issue_labels), null, 2);
-      v.stance_labels = JSON.stringify(JSON.parse(v.stance_labels), null, 2);
-      v.action_labels = JSON.stringify(JSON.parse(v.action_labels), null, 2);
-    } catch(e) {}
-
-    let oldDraft = $("taxonomyDraftEditor");
-    if (oldDraft) oldDraft.remove();
-    
-    const container = document.createElement("div");
-    container.id = "taxonomyDraftEditor";
-    container.style = "border:1px solid var(--color-warning); border-radius:8px; overflow:hidden; margin-top:20px;";
-    
-    container.innerHTML = `
-      <div style="background:#fffbeb; padding:12px 16px; border-bottom:1px solid var(--color-warning); display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <h4 style="margin:0; font-size:14px; color:#b45309;">Draft Review (Belum Aktif)</h4>
-          <div style="font-size:12px; color:#b45309; margin-top:4px;">Versi: ${v.version_id}</div>
-        </div>
-        <button class="btn btn-sm" id="btnActivateDraft" style="background:var(--color-warning); color:#fff; border:none;">Aktifkan Draft Ini</button>
-      </div>
-      <div style="padding:16px;">
-        <div class="form-group" style="margin-bottom:12px;">
-          <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Prompt Context & Definitions</label>
-          <textarea id="editDraftPrompt" class="form-control" rows="8" style="font-family:monospace; font-size:12px;">${escapeHtml(v.prompt_context || "")}</textarea>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
-          <div class="form-group">
-            <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Issues (JSON)</label>
-            <textarea id="editDraftIssues" class="form-control" rows="6" style="font-family:monospace; font-size:11px;">${escapeHtml(v.issue_labels || "")}</textarea>
-          </div>
-          <div class="form-group">
-            <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Stances (JSON)</label>
-            <textarea id="editDraftStances" class="form-control" rows="6" style="font-family:monospace; font-size:11px;">${escapeHtml(v.stance_labels || "")}</textarea>
-          </div>
-          <div class="form-group">
-            <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:4px;">Actions (JSON)</label>
-            <textarea id="editDraftActions" class="form-control" rows="6" style="font-family:monospace; font-size:11px;">${escapeHtml(v.action_labels || "")}</textarea>
-          </div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="regenerateInstructions" class="form-control" style="width:300px; font-size:13px;" placeholder="Instruksi perbaikan ke AI (opsional)">
-            <button class="btn btn-secondary btn-sm" id="btnRegenerateDraft">Regenerate</button>
-          </div>
-          <button class="btn btn-primary btn-sm" id="btnSaveDraftManual">Simpan Editan</button>
-        </div>
-      </div>
-    `;
-    
-    $("taxonomyGenerateSection").after(container);
-    
-    // Bind events
-    $("btnSaveDraftManual").addEventListener("click", async () => {
-      try {
-        await apiFetch(`/projects/${window.MainState.selectedProjectId}/taxonomy/versions/${v.version_id}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            prompt_context: $("editDraftPrompt").value,
-            issue_labels: $("editDraftIssues").value,
-            stance_labels: $("editDraftStances").value,
-            action_labels: $("editDraftActions").value
-          })
-        });
-        showToast("success", "Disimpan", "Draft berhasil diperbarui.");
-        loadTaxonomy();
-      } catch (err) {
-        showToast("error", "Gagal", err.message);
-      }
-    });
-    
-    $("btnActivateDraft").addEventListener("click", async () => {
-      if (confirm("Aktifkan taxonomy ini? Komentar yang sudah dianalisis sebelumnya mungkin akan di-reset untuk dianalisis ulang dengan taxonomy baru.")) {
-        try {
-          await apiFetch(`/projects/${window.MainState.selectedProjectId}/taxonomy/versions/${v.version_id}/activate`, {
-            method: "POST",
-            body: JSON.stringify({ reprocess_all: true })
-          });
-          showToast("success", "Diaktifkan", "Taxonomy baru sekarang aktif.");
-          loadTaxonomy();
-        } catch (err) {
-          showToast("error", "Gagal", err.message);
-        }
-      }
-    });
-    
-    $("btnRegenerateDraft").addEventListener("click", () => {
-      generateTaxonomy($("regenerateInstructions").value);
-    });
-  }
-
-  async function generateTaxonomy(instructions = "") {
-    const pid = window.MainState?.selectedProjectId;
-    if (!pid) return;
-    
-    const btn = $("btnGenerateTaxonomy");
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> Memproses...`;
-    btn.disabled = true;
-    
-    try {
-      const r = await apiFetch(`/projects/${pid}/taxonomy/generate`, {
-        method: "POST",
-        body: JSON.stringify({ instructions })
-      });
-      if (r.success) {
-        showToast("success", "Selesai", r.cache_hit ? "Memuat draft dari cache." : "Draft berhasil digenerate.");
-        loadTaxonomy();
-      }
-    } catch (err) {
-      showToast("error", "Gagal", err.message);
-    } finally {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-    }
+      const versions = versionsResult.versions || [];
+      const active = versions.find(version => version.status === "active");
+      const drafts = versions.filter(version => version.status === "draft");
+      renderActive(active);
+      renderDraft(drafts[0], drafts[1]);
+    } catch (error) { showToast("error", "Gagal memuat taxonomy", error.message); }
   }
 
   function initEvents() {
     $("btnGenerateTaxonomy")?.addEventListener("click", () => generateTaxonomy());
+    $("btnCreateManualTaxonomy")?.addEventListener("click", createManualDraft);
   }
 
-  window.TabTaxonomy = {
-    loadTaxonomy,
-    initEvents
-  };
-
+  window.TabTaxonomy = { loadTaxonomy, initEvents };
 })();

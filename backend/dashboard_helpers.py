@@ -281,7 +281,8 @@ def fetch_interpretation(db_url: str, project_id: Optional[str] = None, video_id
     }
 
 
-def fetch_realtime_metrics(db_url: str, minutes: int = 30) -> Dict[str, Any]:
+def fetch_realtime_metrics(db_url: str, minutes: int = 30,
+                           owner_user_id: Optional[int] = None) -> Dict[str, Any]:
     """Per-minute counts of newly ingested vs newly inferred comments.
 
     Returns a continuous series (one bucket per minute, zero-filled) for the last
@@ -298,17 +299,26 @@ def fetch_realtime_metrics(db_url: str, minutes: int = 30) -> Dict[str, Any]:
 
     # strftime parses the stored ISO8601 (with 'T' and +00:00 offset) and emits
     # a UTC bucket key 'YYYY-MM-DDTHH:MM' that we match against Python keys below.
+    scope = ""
+    params = [cutoff_iso]
+    if owner_user_id is not None:
+        scope = (
+            " AND video_id IN (SELECT v.video_id FROM videos v JOIN projects p "
+            "ON p.project_id = v.project_id WHERE p.owner_user_id = ?)"
+        )
+        params.append(owner_user_id)
+
     with get_db_connection(db_url) as conn:
         ingested_rows = conn.execute(
             "SELECT strftime('%Y-%m-%dT%H:%M', collected_at) AS bucket, COUNT(*) AS cnt "
-            "FROM comments WHERE collected_at >= ? GROUP BY bucket;",
-            (cutoff_iso,),
+            f"FROM comments WHERE collected_at >= ?{scope} GROUP BY bucket;",
+            params,
         ).fetchall()
         inferred_rows = conn.execute(
             "SELECT strftime('%Y-%m-%dT%H:%M', inferred_at) AS bucket, COUNT(*) AS cnt "
-            "FROM comments WHERE inferred_at >= ? AND inference_status = 'completed' "
+            f"FROM comments WHERE inferred_at >= ? AND inference_status = 'completed'{scope} "
             "GROUP BY bucket;",
-            (cutoff_iso,),
+            params,
         ).fetchall()
 
     ingested_map = {r["bucket"]: r["cnt"] for r in ingested_rows}

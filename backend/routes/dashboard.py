@@ -14,13 +14,22 @@ from backend.dashboard_helpers import (
     fetch_summary, fetch_distributions, fetch_timeline,
     fetch_interpretation, fetch_realtime_metrics,
 )
-from backend.routes import ok, err, get_db_url, parse_common_filters
+from backend.routes import (
+    ok, err, get_db_url, parse_common_filters, get_owned_project, get_owned_video,
+)
 
 from datetime import datetime, timezone
 
 logger = logging.getLogger("youtube_collector")
 
 dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/api")
+
+
+def _filters_are_owned(project_id, video_id) -> bool:
+    return not (
+        (project_id and not get_owned_project(project_id))
+        or (video_id and not get_owned_video(video_id))
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -45,6 +54,8 @@ def health():
 @dashboard_bp.route("/dashboard/summary", methods=["GET"])
 def dashboard_summary():
     project_id, video_id, is_baseline = parse_common_filters()
+    if not _filters_are_owned(project_id, video_id):
+        return err("Data not found", 404)
     from flask import session
     try:
         return ok(fetch_summary(get_db_url(), project_id=project_id, video_id=video_id, is_baseline=is_baseline, owner_user_id=session.get("user_id")))
@@ -56,6 +67,8 @@ def dashboard_summary():
 @dashboard_bp.route("/dashboard/distributions", methods=["GET"])
 def dashboard_distributions():
     project_id, video_id, is_baseline = parse_common_filters()
+    if not _filters_are_owned(project_id, video_id):
+        return err("Data not found", 404)
     from flask import session
     try:
         return ok(fetch_distributions(get_db_url(), project_id=project_id, video_id=video_id, is_baseline=is_baseline, owner_user_id=session.get("user_id")))
@@ -68,6 +81,8 @@ def dashboard_distributions():
 def dashboard_timeline():
     days = request.args.get("days", 30, type=int)
     project_id, video_id, is_baseline = parse_common_filters()
+    if not _filters_are_owned(project_id, video_id):
+        return err("Data not found", 404)
     from flask import session
     try:
         return ok(fetch_timeline(get_db_url(), days, project_id=project_id, video_id=video_id, is_baseline=is_baseline, owner_user_id=session.get("user_id")))
@@ -79,8 +94,11 @@ def dashboard_timeline():
 @dashboard_bp.route("/dashboard/realtime", methods=["GET"])
 def dashboard_realtime():
     minutes = request.args.get("minutes", 30, type=int)
+    from flask import session
     try:
-        return ok(fetch_realtime_metrics(get_db_url(), minutes=minutes))
+        return ok(fetch_realtime_metrics(
+            get_db_url(), minutes=minutes, owner_user_id=session.get("user_id")
+        ))
     except Exception as e:
         logger.error(f"Realtime metrics error: {e}")
         return err(str(e))
@@ -90,6 +108,8 @@ def dashboard_realtime():
 def dashboard_representative_comments():
     limit = request.args.get("limit", 8, type=int)
     project_id, video_id, is_baseline = parse_common_filters()
+    if not _filters_are_owned(project_id, video_id):
+        return err("Data not found", 404)
     from flask import session
     try:
         return ok({"comments": sample_inference_rows(limit, get_db_url(), video_id=video_id, is_baseline=is_baseline, project_id=project_id, owner_user_id=session.get("user_id"))})
@@ -101,6 +121,8 @@ def dashboard_representative_comments():
 @dashboard_bp.route("/dashboard/interpretation", methods=["GET"])
 def dashboard_interpretation():
     project_id, video_id, is_baseline = parse_common_filters()
+    if not _filters_are_owned(project_id, video_id):
+        return err("Data not found", 404)
     from flask import session
     try:
         return ok(fetch_interpretation(get_db_url(), project_id=project_id, video_id=video_id, is_baseline=is_baseline, owner_user_id=session.get("user_id")))

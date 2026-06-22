@@ -124,10 +124,55 @@ Buka file `.env` dan masukkan API Key YouTube Anda:
 YOUTUBE_API_KEY=AIzaSy...
 ```
 
+#### Asisten Konfigurasi Project dengan Gemini (Opsional)
+
+Gemini hanya digunakan untuk menyusun draft konteks dan taxonomy project. Gemini
+tidak dipanggil untuk menganalisis komentar satu per satu; proses analisis massal
+tetap memakai pipeline lokal.
+
+Aktifkan fitur ini dengan satu API key baru di `.env`:
+
+```env
+ENABLE_GEMINI_TAXONOMY=true
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_TIMEOUT_SECONDS=30
+GEMINI_MAX_GENERATIONS_PER_PROJECT_PER_DAY=3
+GEMINI_SAMPLE_LIMIT=100
+GEMINI_MIN_SAMPLE_SIZE=20
+```
+
+Jangan memasukkan API key ke source code atau commit Git. Key yang pernah
+dibagikan melalui chat atau media lain harus dicabut di Google Cloud dan diganti
+dengan key baru.
+
+Alur penggunaan di dashboard:
+
+1. Buat project dengan nama dan tujuan pemantauan.
+2. Tambahkan video, lalu crawl sedikitnya 20 komentar valid.
+3. Buka menu `Taxonomy AI` dan pilih `Generate dengan Gemini`.
+4. Tinjau, tambah, hapus, atau ubah seluruh label pada draft.
+5. Gunakan kolom instruksi untuk generate ulang seluruh draft jika diperlukan.
+6. Aktifkan hanya untuk komentar berikutnya, atau pilih analisis ulang secara eksplisit.
+
+Saat Gemini nonaktif, quota habis, atau API key tidak tersedia, gunakan
+`Buat draft manual`. Mode ini tidak memanggil Gemini dan tetap mendukung edit,
+versioning, aktivasi, serta analisis ulang.
+
+Request Gemini yang identik memakai cache. Maksimal tiga request baru per project
+per hari dicatat dalam tabel `llm_generation_runs`; cache hit tidak dihitung.
+
 ### 3. Inisialisasi Database
 Jalankan perintah berikut untuk membuat file SQLite database `data/youtube_monitor.db` beserta seluruh tabel dan indeks yang dibutuhkan:
 ```bash
 python scripts/init_db.py
+```
+
+Untuk database lama, jalankan migrasi idempotent berikut. Script memverifikasi
+bahwa jumlah project, video, dan komentar tidak berubah:
+
+```bash
+python scripts/migrate_project_taxonomy.py
 ```
 
 ### 4. Menambahkan Video ke Monitor Registry

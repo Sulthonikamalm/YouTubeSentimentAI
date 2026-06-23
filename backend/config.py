@@ -81,5 +81,8 @@ def update_env_var(key: str, value: str):
 def get_database_url(settings: dict) -> str:
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
-        db_url = settings.get("storage", {}).get("database_url", "sqlite:///data/youtube_monitor.db")
+        if os.environ.get("VERCEL"):
+            db_url = "sqlite:////tmp/youtube_monitor.db"
+        else:
+            db_url = settings.get("storage", {}).get("database_url", "sqlite:///data/youtube_monitor.db")
     return db_url

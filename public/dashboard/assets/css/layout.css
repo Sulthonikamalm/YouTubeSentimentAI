@@ -1,0 +1,387 @@
+/* -------------------------------------------------------------------------
+   4. Sidebar — Collapsible
+   ------------------------------------------------------------------------- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border-soft);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width var(--transition-sidebar), transform var(--transition-sidebar), visibility var(--transition-sidebar);
+}
+
+/* Desktop only collapse behavior */
+@media (min-width: 901px) {
+  .app-shell.sidebar-collapsed .sidebar {
+    width: var(--sidebar-collapsed-width);
+    visibility: visible;
+    transform: none;
+    border-right: 1px solid var(--color-border-soft);
+  }
+}
+
+/* Collapse toggle button */
+.sidebar-collapse-btn {
+  background: var(--color-neutral-soft);
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all var(--transition);
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+  transform: scale(1.05);
+}
+
+.sidebar-collapse-btn svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-sidebar);
+}
+
+/* Brand */
+.sidebar-brand {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border-soft);
+  min-height: 64px;
+}
+
+.sidebar-brand-logo-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-brand-icon {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-icon svg {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+}
+
+.sidebar-brand-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--transition-sidebar);
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand {
+  padding: 14px 0;
+  justify-content: center;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand-logo-title {
+  justify-content: center;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand-text {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .sidebar-collapse-btn {
+  display: none;
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 8px;
+}
+
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 12px 4px;
+  margin-top: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--transition-sidebar);
+}
+
+.app-shell.sidebar-collapsed .sidebar-section-label {
+  display: none;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: background var(--transition), color var(--transition);
+  text-decoration: none;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar-link:hover {
+  background: var(--color-neutral-soft);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.sidebar-link.active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.sidebar-link svg {
+  width: 18px;
+  height: 18px;
+  color: var(--color-neutral);
+  flex-shrink: 0;
+  transition: color var(--transition);
+}
+
+.sidebar-link.active svg {
+  color: var(--color-primary);
+}
+
+.app-shell.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 12px;
+}
+
+.app-shell.sidebar-collapsed .sidebar-link span {
+  display: none;
+}
+
+/* Footer */
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.sidebar-footer-version {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.sidebar-footer-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-success);
+  white-space: nowrap;
+}
+
+.sidebar-footer-status .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  animation: pulse-dot 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.sidebar-footer-copy {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.app-shell.sidebar-collapsed .sidebar-footer {
+  padding: 12px 0;
+  align-items: center;
+}
+
+.app-shell.sidebar-collapsed .sidebar-footer-status {
+  justify-content: center;
+  gap: 0;
+}
+
+.app-shell.sidebar-collapsed .sidebar-footer-status .status-text {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .sidebar-footer-version,
+.app-shell.sidebar-collapsed .sidebar-footer-copy {
+  display: none;
+}
+
+/* -------------------------------------------------------------------------
+   5. Header
+   ------------------------------------------------------------------------- */
+.topbar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-soft);
+  padding: 16px 28px 14px;
+}
+
+.topbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.topbar-title-group {
+  flex: 1;
+}
+
+.topbar-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.topbar-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
+  max-width: 560px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Project Context Strip — second row inside topbar */
+.project-context-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.project-context-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.project-context-label svg {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.project-context-strip .form-select {
+  min-width: 180px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* -------------------------------------------------------------------------
+   6. Status Strip
+   ------------------------------------------------------------------------- */
+.status-strip {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-soft);
+  padding: 0 28px;
+  height: var(--status-strip-height);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  overflow-x: auto;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.status-label {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.status-value {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-dot.green { background: var(--color-success); }
+.status-dot.amber { background: var(--color-warning); }
+.status-dot.red { background: var(--color-danger); }
+.status-dot.gray { background: var(--color-neutral); }
+
+.status-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border-soft);
+}
+
+.status-spacer { flex: 1; }
+
+.status-updated {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}

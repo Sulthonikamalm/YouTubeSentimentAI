@@ -382,9 +382,45 @@ Semua test menggunakan mock, aman dijalankan tanpa mengonsumsi kuota API.
 
 ## Live Demo
 
-Project ini mendukung Auto Demo Mode via Vercel. Saat frontend di-deploy ke URL yang berakhiran `.vercel.app`, sistem otomatis memuat data simulasi ke dashboard tanpa perlu setup backend lokal. Cocok untuk demonstrasi tanpa konfigurasi tambahan.
+Project ini bisa di-deploy ke Vercel sebagai static site. Tidak perlu backend aktif karena semua data di halaman demo sudah disimulasikan langsung di browser.
 
-*(Tambahkan link Vercel di sini)*
+**Cara deploy:**
+
+1. Push repository ke GitHub
+2. Buka [vercel.com](https://vercel.com) dan import repository tersebut
+3. Vercel otomatis mendeteksi `vercel.json` di root project
+4. Klik Deploy, tidak ada environment variable yang dibutuhkan
+
+**URL yang tersedia setelah deploy:**
+
+| URL | Halaman |
+|---|---|
+| `https://nama-project.vercel.app/` | Landing page |
+| `https://nama-project.vercel.app/dashboard` | Dashboard (langsung masuk, tanpa login) |
+
+Ketika diakses dari domain `*.vercel.app`, seluruh API call otomatis dialihkan ke data simulasi yang sudah disiapkan di `api.js`. Data yang muncul adalah contoh analisis sentimen komentar Untold Story Part 1 dan Part 2.
+
+*(Tambahkan link Vercel di sini setelah deploy)*
+
+---
+
+## Terima Kasih
+
+<div align="center">
+
+Salah satu keputusan paling berpengaruh dalam project ini adalah beralih ke AI lokal Indonesia. Model yang dipakai berjalan di atas infrastruktur **Sahabat AI** - platform kecerdasan buatan lokal yang dibangun untuk bahasa dan konteks Indonesia. Hasilnya jauh lebih akurat untuk komentar berbahasa Indonesia, tingkat halusinasi lebih rendah, dan tidak ada batasan kuota yang menghambat analisis skala besar.
+
+<br/>
+
+<a href="https://sahabat-ai.com/" target="_blank">
+  <img src="https://d2v6npc8wmnkqk.cloudfront.net/storage/23244/Sahabat-AI-Logo---Dark-(Horizontal).png" alt="Sahabat AI" height="48"/>
+</a>
+
+<br/><br/>
+
+[![Sahabat AI](https://img.shields.io/badge/Powered_by-Sahabat_AI-16A34A?style=for-the-badge&logo=openai&logoColor=white)](https://sahabat-ai.com/)
+
+</div>
 
 ---
 

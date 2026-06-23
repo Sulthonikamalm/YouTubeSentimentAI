@@ -36,7 +36,11 @@ LANDING_DIR = PROJECT_ROOT / "landing"
 # (/api/crawler/logs) has something to tail. Without this, the web server only
 # logged to stdout and the activity terminal stayed empty. Attached once to the
 # "youtube_collector" parent logger — child loggers (.inference, .llm) propagate.
-_LOG_FILE = PROJECT_ROOT / "logs" / "crawler.log"
+if os.environ.get("VERCEL"):
+    _LOG_FILE = Path("/tmp/logs/crawler.log")
+else:
+    _LOG_FILE = PROJECT_ROOT / "logs" / "crawler.log"
+
 _LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 if not any(
     isinstance(h, logging.FileHandler)

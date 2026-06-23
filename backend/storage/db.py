@@ -22,10 +22,13 @@ def get_db_path(database_url: str = None) -> Path:
         db_path_str = database_url[len("sqlite:///"):]
 
     project_root = Path(__file__).resolve().parent.parent.parent
-    full_path = project_root / db_path_str
+    db_path = Path(db_path_str)
     
-    full_path.parent.mkdir(parents=True, exist_ok=True)
-    return full_path
+    if not db_path.is_absolute():
+        db_path = project_root / db_path_str
+    
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return db_path
 
 @contextmanager
 def get_db_connection(database_url: str = None):

@@ -1,0 +1,10 @@
+backend/
+config/
+data/
+logs/
+outputs/
+raw/
+scripts/
+tests/
+requirements.txt
+README.md

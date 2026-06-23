@@ -400,7 +400,7 @@ Project ini bisa di-deploy ke Vercel sebagai static site. Tidak perlu backend ak
 
 Ketika diakses dari domain `*.vercel.app`, seluruh API call otomatis dialihkan ke data simulasi yang sudah disiapkan di `api.js`. Data yang muncul adalah contoh analisis sentimen komentar Untold Story Part 1 dan Part 2.
 
-*(Tambahkan link Vercel di sini setelah deploy)*
+**Vercel Live Demo:** [https://youtubesentimensahabatai.vercel.app/](https://youtubesentimensahabatai.vercel.app/)
 
 ---
 

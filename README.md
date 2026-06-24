@@ -380,6 +380,260 @@ Semua test menggunakan mock, aman dijalankan tanpa mengonsumsi kuota API.
 
 ---
 
+## System Architecture & Pipeline
+
+Berikut adalah arsitektur sistem lengkap dari **YouTube Comment Intelligence Platform** — mulai dari pengumpulan data mentah di YouTube hingga visualisasi insight di dashboard. Alur ini dirancang berdasarkan prinsip *incremental crawling*, *dual-engine inference*, dan *real-time monitoring*.
+
+---
+
+### 1. Overview Arsitektur Sistem
+
+```mermaid
+flowchart TD
+    subgraph INPUT["① DATA SOURCE"]
+        YT["🎬 YouTube Videos\n(Untold Story Pt.1 & Pt.2)"]
+        API["YouTube Data API v3\n(commentThreads.list\ncomments.list\nvideos.list)"]
+        YT --> API
+    end
+
+    subgraph CRAWL["② CRAWLING LAYER\ncrawl_runner.py"]
+        direction TB
+        QT["Quota Tracker\n≤10.000 unit/hari"]
+        DED["Deduplicator\n(consecutive-dup early-stop)"]
+        NORM["Comment Normalizer\n(Unicode, slang, emoji)"]
+        API --> QT --> DED --> NORM
+    end
+
+    subgraph STORE["③ STORAGE\nSQLite · repository.py"]
+        DB[("SQLite DB\ncomments\nvideos\ncrawl_runs\napi_usage\ntaxonomy")]
+        NORM --> DB
+    end
+
+    subgraph INFER["④ INFERENCE ENGINE\ninference_service.py"]
+        direction TB
+        CACHE{"Prediction\nCache Hit?"}
+        LLM["🤖 Sahabat AI 8B\n(Ollama · local)\nChain-of-Thought Prompt"]
+        FALLBACK["📋 Rule-Based Taxonomy\n(keyword matching)"]
+        PARSE["JSON Label Parser\n+ Label Validator"]
+        INTERP["Interpretation Builder\n(human-readable sentence)"]
+        DB --> CACHE
+        CACHE -- "HIT (same text)" --> INTERP
+        CACHE -- "MISS" --> LLM
+        LLM -- "Ollama down" --> FALLBACK
+        LLM --> PARSE --> INTERP
+        FALLBACK --> INTERP
+        INTERP --> DB
+    end
+
+    subgraph OUTPUT["⑤ OUTPUT LABELS"]
+        direction LR
+        S["sentiment\nnegative·neutral\n·positive"]
+        I["issue\n10 kategori"]
+        ST["stance\n8 kategori"]
+        A["action_intent\n8 kategori"]
+    end
+
+    subgraph DASH["⑥ DASHBOARD\nFlask API + Vanilla JS"]
+        KPI["KPI Cards\n(total, 24h, pending)"]
+        CHART["Distribusi Chart\n(Chart.js)"]
+        TIMELINE["Timeline Trend\n(per hari)"]
+        INSIGHT["Auto Insight Panel\n(warnings + rekomendasi)"]
+        REALTIME["Real-time Feed\n(per menit)"]
+    end
+
+    INTERP --> S & I & ST & A
+    DB --> KPI & CHART & TIMELINE & INSIGHT & REALTIME
+
+    style INPUT fill:#1e3a5f,color:#e2e8f0,stroke:#3b82f6
+    style CRAWL fill:#1e3a5f,color:#e2e8f0,stroke:#3b82f6
+    style STORE fill:#1a2e1a,color:#e2e8f0,stroke:#22c55e
+    style INFER fill:#3b1f2b,color:#e2e8f0,stroke:#ec4899
+    style OUTPUT fill:#2d1f3d,color:#e2e8f0,stroke:#a855f7
+    style DASH fill:#1f2937,color:#e2e8f0,stroke:#f59e0b
+```
+
+---
+
+### 2. Dual-Engine Inference Pipeline
+
+Sistem menggunakan dua mesin inferensi yang bekerja secara hierarkis — prioritas utama ke **LLM lokal** (Sahabat AI 8B via Ollama), dengan *fallback* otomatis ke **Rule-Based Taxonomy** jika model tidak tersedia.
+
+```mermaid
+flowchart LR
+    subgraph INPUT2["Input Representation"]
+        direction TB
+        RAW["Raw Comment Text\n(Bahasa Indonesia)"]
+        CTX["Context Builder\n+ parent reply text\n+ is_reply flag"]
+        NORM2["Text Normalizer\n(slang · emoji · unicode)"]
+        RAW --> NORM2 --> CTX
+    end
+
+    subgraph ENGINE["SentimentAI-Indonesia\n(Dual-Engine)"]
+        direction TB
+
+        subgraph PRIMARY["Primary: LLM Inference"]
+            COT["Chain-of-Thought Prompt\nanalisis → labels"]
+            SAHABAT["Sahabat AI 8B\n(llama3_instruct_Q4_K_M)\nvia Ollama · localhost:11434"]
+            RETRY["Retry (×2)\n+ Exponential Backoff"]
+            COT --> SAHABAT --> RETRY
+        end
+
+        subgraph FALLBACK2["Fallback: Rule-Based Taxonomy"]
+            KW["Keyword Matcher\n(taxonomy.py)"]
+            classify["classify_issue()\nclassify_stance()\nclassify_action_intent()"]
+            KW --> classify
+        end
+
+        VOTE["Label Validator\n(out-of-vocab → safe default)\n+ Interpretation Builder"]
+        PRIMARY -- "success" --> VOTE
+        PRIMARY -- "no response / Ollama down" --> FALLBACK2 --> VOTE
+    end
+
+    subgraph OUTPUT2["Final Decision"]
+        direction TB
+        SEN["sentiment\nnegative / neutral / positive"]
+        ISS["issue label\n10 kategori isu publik"]
+        STA["stance label\n8 kategori sikap"]
+        ACT["action intent\n8 kategori intensi"]
+        SHO["interpretation_short\n(kalimat naratif)"]
+        VOTE --> SEN & ISS & STA & ACT & SHO
+    end
+
+    subgraph CACHE2["Prediction Cache\n(SQLite · same text → reuse)"]
+        CHK{"Cache\nHit?"}
+    end
+
+    CTX --> CHK
+    CHK -- "HIT" --> VOTE
+    CHK -- "MISS" --> ENGINE
+
+    style ENGINE fill:#2d1b2e,color:#f3e8ff,stroke:#c084fc
+    style PRIMARY fill:#1e1b4b,color:#e0e7ff,stroke:#818cf8
+    style FALLBACK2 fill:#1c2432,color:#dbeafe,stroke:#60a5fa
+    style OUTPUT2 fill:#14202e,color:#fef9c3,stroke:#facc15
+    style CACHE2 fill:#0f2318,color:#dcfce7,stroke:#4ade80
+    style INPUT2 fill:#1e293b,color:#e2e8f0,stroke:#94a3b8
+```
+
+---
+
+### 3. Alur Crawling Inkremental
+
+```mermaid
+sequenceDiagram
+    actor User as 👤 User / Scheduler
+    participant Sched as Scheduler Service
+    participant Runner as Crawl Runner
+    participant YT as YouTube API v3
+    participant DB as SQLite DB
+    participant Infer as Inference Service
+    participant LLM as Sahabat AI (Ollama)
+
+    User->>Sched: Manual trigger / Auto (interval)
+    Sched->>Runner: run_youtube_crawl(trigger_type)
+    Runner->>DB: save_crawl_run(status=running)
+    Runner->>YT: videos.list (metadata)
+    YT-->>Runner: video_title, channel_title
+
+    loop Setiap video yang dipantau
+        Runner->>YT: commentThreads.list(page_token)
+        YT-->>Runner: comment items + inline replies
+
+        loop Setiap komentar
+            Runner->>DB: check dedup (comment_id)
+            alt Komentar baru
+                Runner->>DB: save_comment(status=pending)
+            else Komentar diperbarui
+                Runner->>DB: update_comment(reset→pending)
+            else Duplikat identik
+                Runner->>Runner: increment dup_counter
+            end
+
+            opt total_replies > inline_count
+                Runner->>YT: comments.list(parent_id)
+                YT-->>Runner: full reply thread
+                Runner->>DB: save_replies
+            end
+        end
+
+        Runner->>DB: update_video_last_checked
+    end
+
+    Runner->>DB: save_crawl_run(status=completed)
+
+    alt new_comments > 0 OR updated_comments > 0
+        Runner->>Infer: infer_pending(limit=500)
+        Infer->>DB: get_pending_comment_ids
+        Infer->>LLM: analyze_comments_batch (chunk=3)
+        LLM-->>Infer: JSON labels (sentiment, issue, stance, action)
+        Infer->>DB: batch_update_inference (per chunk)
+    end
+
+    Infer-->>User: ✅ Dashboard diperbarui secara real-time
+```
+
+---
+
+### 4. Taksonomi Label
+
+Label yang diprediksi mencakup **4 dimensi analisis** yang saling melengkapi:
+
+```mermaid
+mindmap
+  root((Analisis\nKomentar))
+    Sentiment
+      negative
+      neutral
+      positive
+    Issue
+      ekonomi_rakyat
+      kepercayaan_publik
+      pemerintahan_kebijakan
+      hukum_korupsi
+      elite_politik
+      geopolitik_keamanan
+      media_narasi
+      demokrasi_aksi_publik
+      feedback_video
+      lainnya
+    Stance
+      kritik_pemerintah
+      dukung_pemerintah
+      dukung_video
+      kritik_video
+      sinis_tidak_percaya
+      netral_informatif
+      debat_antar_pengguna
+      tidak_terdeteksi
+    Action Intent
+      menuntut_akuntabilitas
+      dorongan_aksi_publik
+      perubahan_elektoral
+      menyebarkan_kesadaran
+      harapan_doa
+      menunggu_mengamati
+      apatis_sinis
+      tidak_terdeteksi
+```
+
+---
+
+### 5. Ringkasan Teknis Pipeline
+
+| Tahap | Komponen | Teknologi |
+|---|---|---|
+| **① Data Source** | YouTube comment threads + replies | YouTube Data API v3 |
+| **② Crawling** | Incremental crawl, dedup, quota guard | `crawl_runner.py` · Python |
+| **③ Preprocessing** | Normalisasi teks, slang Bahasa Indonesia, emoji stripping | `text_utils.py` · `normalize_text()` |
+| **④ Inference (Primary)** | Chain-of-Thought prompting → 4-label JSON | Sahabat AI 8B · Ollama · `ollama_service.py` |
+| **④ Inference (Fallback)** | Keyword-based taxonomy matching | `intelligence_engine.py` · `taxonomy.py` |
+| **⑤ Caching** | Identical text → reuse prediction (scoped per project) | SQLite · `_lookup_cache()` |
+| **⑥ Storage** | Structured relational store | SQLite · `repository.py` |
+| **⑦ API Layer** | RESTful endpoints, auth guard, blueprint modular | Flask · `app.py` |
+| **⑧ Visualization** | KPI, distribusi, timeline, real-time feed, insight panel | Chart.js · Vanilla JS |
+
+---
+
 ## Live Demo
 
 Project ini bisa di-deploy ke Vercel sebagai static site. Tidak perlu backend aktif karena semua data di halaman demo sudah disimulasikan langsung di browser.
